@@ -1,0 +1,1827 @@
+Ahyper-heuristic algorithm viaproximalpolicyoptimization for
+multi-objective trussproblems
+ShihongYin,Zhengrong Xiang*
+SchoolofAutomation, NanjingUniversityofScienceandTechnology, Nanjing210094,Jiangsu,China
+ARTICLE INFO
+Keywords:
+Multi-objective optimization
+Trussoptimization
+Proximalpolicyoptimization
+Hyper-heuristic algorithm
+DynamiccrowdingdistanceABSTRACT
+Thispaperproposesahyper-heuristic evolutionary algorithm viaproximalpolicyoptimization, namedHHEA-
+PPO,forsolvingmulti-objective trussoptimization problems. HHEA-PPO hasatwo-layer structure: ahigh-
+levelstrategyandlow-levelheuristics. Thehigh-level strategyconsistsofproximalpolicyoptimization, while
+thelow-levelheuristics consistoftenpredefined heuristicoperators. Duringtheiterationprocess,thehigh-level
+strategyselectsthemostpromising low-levelheuristicaccording tothestateoftheindividuals andthepopu-
+lation.Tomaintaintheconvergence anddistribution oftheexternalParetoarchive,adynamiccrowdingdistance
+mechanism isemployed. HHEA-PPO isappliedtoeightmulti-objective trussoptimization problems and
+compared withthirteenstate-of-the-art optimization algorithms intermsofsuccessrate,averagecomputation
+duration, andaveragefitnessevaluations toevaluateitsperformance. TheresultsshowthatHHEA-PPO has
+highersearchefficiency andgreaterstability,demonstrating itsabilitytosolvelarge-scale engineering design
+problems.
+1.Introduction
+Trussoptimization isanimportant topicinthefieldsofaerospace,
+mechanical manufacturing, andcivilengineering. Thepurposeoftruss
+optimization istoimprovestructural performance, reducemass,
+enhanceload-bearing capacity, andmeetotherengineering re-
+quirements byadjustingthedesignvariablesofthetrussstructure.Truss
+optimization problemsaremainlyclassifiedintotopologyoptimization
+(Fairclough &Gilbert,2020;Poulsenetal.,2020;Tejani,Savsani,etal.,
+2019),shapeoptimization (Azizietal.,2022;Kaveh &Khayatazad,
+2013;Nguyen-Van etal.,2021),sizeoptimization (Lieuetal.,2018;
+Pham&Tran,2022;Wuetal.,2023),andthejointoptimization ofthese
+threevariables(Anosrietal.,2022;Panagant &Bureerat,2018).To-
+pologyvariablesdetermine thebasicconnectivity ofthetruss,shape
+variablesadjustthegeometric shapeofthetrussmembers, andsize
+variablesdictatethespecificphysicalsizesofthemembers(Panagant
+etal.,2021).Sizeoptimization helpstoadjusttheactualconstruction of
+thetrussstructuretobettermeetthedesignrequirements. However,
+currentresearchonsizeoptimization isrelativelylimited,sothispaper
+primarilyfocusesontheoptimization ofsizevariables.
+Asresearchandapplications advance,trusssizeoptimization has
+become increasingly complex, involving multiple objectives,constraints, anddiscretevariables(Panagantetal.,2019).Traditional
+trussoptimization methods,suchaslinearprogramming (Lamberti &
+Pappalettere, 2004),arenolongersufficient tomeetpracticalre-
+quirements. Toovercome thesechallenges, researchers haveproposed
+variousimproved metaheuristic algorithms. Thesealgorithms can
+effectively helpengineersfindoptimalsolutionsthatsatisfyconstraints,
+therebyminimizing materialcostandtrussmasswhileimproving safety
+andstability.
+Inpreviousresearch,avarietyoftrussoptimization algorithms have
+beenproposed, whichcanbebroadlyclassified intosingle-objective
+algorithms andmulti-objective algorithms. Somesuccessful single-
+objectivetrussoptimization algorithms include:artificialbeecolony
+(Jawadetal.,2021;Sonmez,2011),particleswarmoptimization (PSO)
+(Gomes,2011),cuckoosearchalgorithm (Gandomietal.,2013),hybrid
+intelligent geneticalgorithm (GA)(Liu&Xia,2022),improved differ-
+entialevolution (DE)(Ho-Huuetal.,2016;Renkavieski &Parpinelli,
+2021),improved symbiotic organismsearch(Kumaretal.,2019;Tejani
+etal.,2016),improved dolphinecholocation algorithm (Gholizadeh &
+Poorhoseini, 2016),improved harmonysearchalgorithm (Degertekin,
+2012),improved coyoteoptimization algorithm (Pierezanetal.,2021),
+improved slimemouldalgorithm (Kavehetal.,2022),improved whale
+optimization algorithm (Jiangetal.,2021),andgeneralized normal
+*Corresponding author.
+E-mailaddresses: yinshihong@njust.edu.cn (S.Yin),xiangzr@njust.edu.cn (Z.Xiang).
+ContentslistsavailableatScienceDirect
+ExpertSystemsWithApplications
+u{�~zkw s{yo|kr o>ÐÐÐ1ow�o �to~1m{y2w{m k�o2o�Ðk
+https://doi.org/10.1016/j.eswa.2024.124929
+Received4January2024;Receivedinrevisedform21June2024;Accepted26July2024Expert  Systems  With Applications  256 (2024)  124929  
+Available  online  30 July 2024  
+0957-4174/©  2024  Elsevier  Ltd. All rights  are reserved,  including  those  for text and data mining,  AI training,  and similar  technologies.  distribution optimization (Khodadadi &Mirjalili,2022).Intheabove
+studies,thestructural massistypicallyconsidered astheoptimization
+objective.
+Someadditional objective functions, suchascompliance (Kumar
+etal.,2022;Panagant etal.,2021),reliability (Ho-Huu,Duong-Gia,
+etal.,2018;Techasenetal.,2019),ordisplacement (Ho-Huu,Hartjes,
+etal.,2018;Kumar,Tejani,Pholdee, &Bureerat, 2021),havebeen
+considered byresearchers inmulti-objective trussproblemsinorderto
+obtainamorerealisticdesignsolution.Unlikethesingle-objective al-
+gorithm,thechallengeofthemulti-objective algorithm liesinbalancing
+variousconflicting objectives. Tosolvethemulti-objective trussprob-
+lem,variousmulti-objective optimization algorithms havebeenintro-
+ducedbyresearchers, someofwhichinclude:NSGA-II(Ho-Huu,Duong-
+Gia,etal.,2018),MOEA/D(Ho-Huu,Hartjes,etal.,2018),andmulti-
+objectivesymbiotic organismsearch(Tejani,Pholdee,etal.,2019).
+Metaheuristic algorithms haveshownexcellent performance in
+multi-objective trussoptimization problems, buttheyareoftenlimited
+byspecificprobleminstancesandtheexperience ofhumanexperts.To
+addressthisissue,hyper-heuristic evolutionary algorithms (HHEAs)
+havereceivedconsiderable attention(Escalanteetal.,2021).Areview
+oftheexistingliteratureshowsthatalmostnoHHEAhasbeendeveloped
+specifically fortrussproblems, especially multi-objective optimization
+problems(Oztürk &Kahraman, 2023).Therefore, developing anHHEA
+forsolvingmulti-objective trussproblemswillfillaresearchgapinthis
+area.
+Duetothe“nofreelunch ”theorem(Wolpert &Macready, 1997),itis
+difficultforresearchers todetermine inadvancewhichheuristicalgo-
+rithmisbestsuitedtosolveaparticular problem.HHEAcanalleviate
+thisproblembyselecting,generating, andarranging thebestheuristic
+algorithms (Dokeroglu etal.,2024).HHEAincludeshigh-level strategies
+(HLS)andlow-level heuristic74510s (LLH).Currently, manyHHEAs
+selectLLHsbasedsolelyontheirperformance, suchasthemulti-armed
+bandit-based HHEA(Almeidaetal.,2020)andtheThompson sampling-
+basedHHEA(Sun&Li,2020).Thesealgorithms learnonlythevaluesof
+theLLHsandignorethestateinformation ofthesearchagents.Other
+HHEAsfocusonusingtabularreinforcement learningmethods,suchas
+SARSA-based HHEAs(Caoetal.,2021)andQ-learning-based HHEAs
+(Zhang,Wu,etal.,2023;Zhaoetal.,2023).However, thesealgorithms
+requirediscretization ofthestatespacewhendealingwithcontinuous
+statespaces,leadingtounreliable results(Yietal.,2023).Thereis
+limitedresearchonusingadvanced reinforcement learningmethodsto
+handlecontinuous statespacesinthedesignofHHEAs.Tianetal.(Tian
+etal.,2023)designedanadaptivemulti-objective algorithm usingdeep
+Q-network (DQN),whichachieved higherconvergence accuracy.
+However, DQNhasalongtrainingtimeanddoesnotconsiderthe
+constraint handlingmechanism. Yietal.(Yietal.,2023)designeda
+generalsearchframework usingbothDQNandproximalpolicyopti-
+mization(PPO),andtheresultsshowedthatPPO-based adaptivealgo-
+rithmsoutperformed DQN-based adaptivealgorithms. Although this
+studydemonstrated thepotentialofPPO,itdidnotconsidermulti-
+objective andconstraint handling mechanisms andusedatime-
+consuming offlinetrainingmethod.Duetothepresenceofmultiple
+conflicting objectivefunctionsandstressconstraints intrussproblems,
+existingHHEAsarenotsuitableforsolvingthisproblem.
+Basedontheabovediscussion, aPPO-based HHEA(HHEA-PPO) is
+proposed toaddressconstrained multi-objective trussproblems. The
+maininnovations ofthispaperincludethePPO-based HLS,theinte-
+grationoftendifferentLLHs,andanexternalParetoarchivemainte-
+nancemethodusingdynamic crowding distance (DCD).These
+innovations aimtoimprovetheadaptability, convergence performance,
+andabilitytohandlelarge-scale problemsofthealgorithm.
+Themaincontributions ofthispapercanbesummarized asfollows:
+≡APPO-based onlinelearningmechanism isdesignedtocombinethe
+trainingprocessofneuralnetworkswiththepopulation evolution.≡Tenlow-levelheuristicsareintegrated toprovidediversechoicesfor
+high-level strategies.
+≡Anewstatespaceandrewardmechanism aredesignedforcon-
+strainedmulti-objective optimization problems.
+≡AnexternalParetoarchiveusingdynamiccrowdingdistancesisin-
+tegratedtomaintaintheconvergence anddiversityoftheParetoset.
+≡Theperformance ofHHEA-PPO isevaluated oneightmulti-objective
+trussproblems andcompared withthirteenstate-of-the-art algo-
+rithmsintermsofsuccessrate,averagecomputation duration,and
+averagenumberoffitnessevaluations.
+Therestofthispaperisorganized asfollows.Thebackground and
+relatedworkonhyper-heuristic algorithms andtrussoptimization
+problemsarepresented inSection2.Thedesignandimplementation of
+HHEA-PPO isdescribed indetailinSection3.Simulation results,com-
+parisonsanddiscussions arepresented inSection4.Finally,the
+conclusion isgiveninSection5.
+2.Background andrelated works
+2.1.Hyper-heuristic algorithmsformulti-objective optimization
+Recentstudieshaveexploredvarioushyper-heuristic algorithms to
+improvetheperformance ofmulti-objective optimization problems. The
+maincontributions anduniqueaspectsofthesestudiesaresummarized
+inTable1.
+Table 1
+Recentstudiesofmulti-objective hyper-heuristic algorithms.
+Research Algorithm MainContributions UniqueAspects
+(Almeida
+etal.,
+2020)HH-
+LinUCBUsedmulti-armed bandit
+modelsasahyper-
+heuristicframework to
+dynamically selectthe
+optimaloperatorsProposesanupper
+confidence bound
+algorithm anda
+dynamicThompson
+samplingalgorithm
+(Venske
+etal.,
+2022)HHMOEA/
+DDProposedaselection
+hyper-heuristic algorithm
+formulti-objective and
+many-objective quadratic
+assignment problemsIntegrates multiple
+selectionstrategies,
+improving the
+adaptability ofthe
+algorithm todifferent
+problems
+(Tian
+etal.,
+2023)MOEA/D-
+DQNProposedanadaptive
+operatorselection
+methodusingdeep
+reinforcement learningUsesdeepneural
+networkstolearntheQ-
+valuesofoperators,
+dynamically selecting
+theoptimaloperator
+(Ahmed &
+Babu,
+2024)HHOPSO Proposedahyper-
+heuristicmulti-objective
+onlineoptimization
+algorithm forcyber
+securityproblemsinbig
+dataDynamically adjusts
+algorithm parameters
+throughonlinelearning
+mechanism, improving
+problem-solving
+performance forcyber
+securityproblems
+(Lietal.,
+2024)COHH Proposedacompass-
+basedhyper-heuristic
+methodformulti-
+objectiveoptimization
+problemsUsesadirectional
+guidancemechanism to
+dynamically select
+operators, improving
+searchefficiency and
+solutionquality
+(Yin&
+Xiang,
+2024)AdaW-
+DDQNProposedanadaptive
+operatorselection
+paradigm withdueling
+doubledeepQ-network
+(DDQN)Decomposes theQ-
+networkintostatevalue
+networkandaction
+advantage network,
+improving learning
+efficiency andprecision
+ofstrategyselection
+(Xuetal.,
+2024)NSGA-II-
+DQNProposedahyper-
+heuristicmethodviadeep
+Q-network formulti-
+objectiveoptimization of
+unmanned surface
+vehiclescheduling
+problemsDeepQ-network learns
+theutilityvaluesof
+differentoperatorsand
+dynamically selectsthe
+optimaloperatorS.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+2 Compared withthecurrentresearch,thispaperproposestheHHEA-
+PPOalgorithm, whichisthefirstalgorithm tousePPOformulti-
+objective trussoptimization. Itintegrates tendifferentLLHsanda
+DCDmechanism tomaintainconvergence anddiversity.Unlikeprevious
+studiesthatrelyonsimplerbanditmodelsorQ-learning, HHEA-PPO
+usesPPO,amoreadvanced policyoptimization method,whichen-
+suresbetteradaptability andstability.TheuseofDCDfurtherenhances
+itsefficiency inmaintaining Paretooptimality.2.2.Multi-objective trussoptimization problems
+Trussoptimization remainsacriticalareainstructural engineering,
+withrecentstudiesfocusingondifferentoptimization strategies. Table2
+providesanoverviewofsignificant contributions inthisarea.
+Inthispaper,HHEA-PPO isintroduced formulti-objective truss
+optimization, whichprovidesanonlinelearningmechanism anda
+diversesetofLLHs.Theproposed algorithm usesPPOforpolicy
+Table 2
+Recentstudiesofmulti-objective trussoptimization problems.
+Research Algorithm Application MainContributions UniqueAspects
+(Carvalho etal.,
+2021)MM-IPDE Multi-objective trussdesign
+optimizationProposedamulti-objective trussdesignoptimization
+methodusingdifferential evolutionalgorithms,
+demonstrating superiorperformance invarious
+optimization problemsUsesdifferential evolutionalgorithms,
+improving theperformance inmulti-objective
+optimization
+(Kumar,Tejani,
+Pholdee, &
+Bureerat,2021)MOMHTS Multi-objective truss
+optimizationProposedamodifiedheattransfersearchalgorithm for
+multi-objective trussoptimization, demonstrating high
+efficiency androbustness indealingwithmulti-
+objectiveproblemsCombines heattransferoptimization strategies,
+improving thediversityandqualityof
+optimization results
+(Kumar,Tejani,
+Pholdee,
+Bureerat,etal.,
+2021)HHTS-PVS Multi-objective structural
+optimizationProposedahybridheattransfersearchandpassing
+vehiclesearchalgorithm formulti-objective structural
+optimization, demonstrating highefficiency and
+solutionqualityCombines heattransferandpassingvehicle
+searchstrategies, improving theefficiency and
+qualityofmulti-objective optimization
+(Lemonge etal.,
+2021)GDE3 Trussstructural
+optimizationProposedamulti-objective trussstructuraloptimization
+methodconsidering naturalfrequencies ofvibration
+andglobalstability,demonstrating highefficiency and
+solutionqualityCombines naturalfrequencies ofvibrationand
+globalstability,improving thestabilityand
+qualityofoptimization results
+(Panagant etal.,
+2021)SHAMODE-
+WOConstrained truss
+optimization problemsCompared recentmulti-objective metaheuristics for
+solvingconstrained trussoptimization problems,
+providing acomprehensive performance evaluation
+andcomparisonProvidesacomparative studyofvariousrecent
+algorithms, demonstrating theadvantages and
+disadvantages ofeachunderdifferentconstraint
+conditions
+(Tejanietal.,2021)MOHTS Trussoptimization Proposedamulti-objective heattransfersearch
+algorithm fortrussoptimization, demonstrating high
+efficiency andsolutionqualityCombines heattransferoptimization strategies,
+improving theefficiency andqualityofmulti-
+objectiveoptimization
+(Anosrietal.,
+2022)iSHAMODE-
+WOSimultaneous topology,
+shape,andsize
+optimization oftrussesProposedasuccesshistory-based adaptivemulti-
+objectivedifferential evolutionalgorithm for
+simultaneous topology,shape,andsizeoptimization of
+trusses,improving reliabilityCombines adaptivestrategywithdifferential
+evolutionalgorithm, improving thestabilityand
+adaptability ofthealgorithm
+(Eidetal.,2022) MOSWCA Multi-objective truss
+optimizationProposedamulti-objective spiralwatercyclealgorithm,
+incorporating hyperbolic spiralmotiontoguidethe
+searchprocess,demonstrating superioroptimization
+performanceIncorporates hyperbolic spiralmotionintothe
+watercyclealgorithm, enhancing theutilization
+abilityandconvergence performance
+(Kumaretal.,
+2022)MOTEO Trussdesignoptimization Proposedaphysics-based multi-objective thermal
+exchangeoptimization algorithm andappliedittotruss
+designoptimization, demonstrating highefficiency and
+solutionqualityIntroduces athermalexchangephysicalmodel,
+enhancing theeffectiveness andaccuracyof
+multi-objective optimization
+(Davidetal.,2023)EvoDN2 Trusstopology
+optimization ofadditively
+manufactured componentsProposedamulti-objective evolutionary algorithm for
+trusstopologyoptimization ofadditively manufactured
+components, optimizing structuralstiffnessandthermal
+conductivity toenhancedesignqualityCombines additivemanufacturing technology
+withefficienttopologyoptimization
+(Kumaretal.,
+2023)MOMVO2arc Multi-objective trussdesign
+optimizationProposedatwo-archive multi-objective multi-verse
+optimizer fortrussdesign,demonstrating high
+efficiency androbustnessCombines two-archive andmulti-verse
+strategies, enhancing theadaptability ofthe
+algorithm
+(Yinetal.,2023) IBMSMA Multi-objective truss
+optimizationProposedanindicator-based multi-swarm slimemould
+algorithm forsolvingmulti-objective trussoptimization
+problems, demonstrating highefficiencyandstabilityin
+dealingwithcomplexoptimization problemsCombines multi-swarm strategieswithindicator
+methods,improving thequalityanddiversityof
+optimization results
+(Zhongetal.,2023)MO-SHADE-
+MRFOMulti-objective structural
+optimizationProposedamulti-objective SHADEwithmantaray
+foragingoptimizer forstructural designproblems,
+demonstrating highefficiency androbustnessCombines SHADEandmantarayforaging
+strategies, enhancing theadaptability ofthe
+algorithm
+(Carvalho etal.,
+2024)CMOPSO Trussstructural
+optimizationProposedamulti-objective trussstructuraloptimization
+methodconsidering naturalfrequencies ofvibration
+andautomatic membergrouping, demonstrating high
+efficiency androbustnessCombines naturalfrequencies ofvibrationwith
+automatic membergroupingstrategies,
+enhancing thestabilityandadaptability of
+optimization results
+(Carvalho etal.,
+2024)MOEAs Trussstructural
+optimizationProposedamulti-objective trussstructuraloptimization
+methodcombining evolutionary algorithms with
+automatic membergrouping, demonstrating high
+efficiency androbustnessCombines evolutionary algorithms with
+automatic membergroupingstrategies,
+improving thequalityandadaptability of
+optimization results
+(Kupwiwat etal.,
+2024)MADDPG Trussstructural
+optimizationProposedamulti-objective optimization methodfor
+trussstructures usingmulti-agent reinforcement
+learningandgraphrepresentation, demonstrating high
+performance andsolutionqualityCombines multi-agent reinforcement learning
+strategies, enhancing optimization performance
+(Voetal.,2024) MOGWOCS Spatialtrussdesign
+optimizationProposedamulti-objective greywolf-cuckoo search
+algorithm forspatialtrussdesignoptimization,
+demonstrating highefficiency andsolutionqualityCombines greywolfandcuckoosearch
+strategies, enhancing therobustness ofthe
+algorithmS.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+3 optimization andincorporates DCDtomaintainthediversityofPareto
+frontiers,whichprovidesasignificant improvement intermsofstability
+andconvergence speedcompared toexistingmethods.Byintegrating
+thePPO-based HLSandadiversesetofLLHs,HHEA-PPO standsoutin
+bothhyper-heuristic algorithm researchandtrussoptimization. The
+DCDmechanism furtherensurestheefficiency androbustness ofthe
+algorithm insolvinglarge-scale complexmulti-objective optimization
+problems.
+2.3.Definitionofmulti-objective trussoptimization problem
+Withoutlossofgenerality, aconstrained multi-objective optimiza-
+tionproblemcanberepresented as
+minFxf1xCf2xCBBBCfmxC
+sBtBgix⩽0Ci1C2CBBBCpC
+hjx0Cj1C2CBBBCqC
+x∃lbCub≤ZnC(1)
+whereFxisavectorofobjectives, gixandhjxareconstraints, xisa
+vectorofvariables, lbandubarethelowerandupperlimitsofthe
+variables.
+Therelevantdefinitions ofmulti-objective optimization areas
+follows:
+(1)Paretodominance: Intheobjectivespace,ifsolution x1issupe-
+riortoorequaltosolution x2inallobjectives andissuperiortox2inat
+leastoneobjective, thenx1dominates x2.
+(2)Non-dominated solution:Asolution xiscalledanon-dominated
+solutionifthereisnosolution y∃Znthatdominates x.
+(3)Paretoset(PS):PSreferstothesetofallnon-dominated solutions
+inamulti-objective optimization problem.Thesesolutionscannotbe
+surpassed byanyothersolutioninallobjectives.
+(4)Paretofront(PF):PFreferstothemappingofthePSinthe
+objectivespace.
+Themulti-objective trussoptimization problemisamajorchallenge
+inthefieldofstructural engineering. Trussesarestructural systems
+composed ofmembersandnodesthatarecommonly usedtosupportand
+distribute loads.Instructural engineering design,optimization oftruss
+variablessuchastopology,shape,material,andsize,iscrucialtomeet
+specificrequirements intermsofmass,compliance, reliability, andcost.
+Trussoptimization decisionvariablesaredividedintotopology,shape,
+andsizevariables. Topology variablesdetermine theoverallconnec-
+tivityandlayoutofthestructure. Shapevariablescorrespond tojoint
+locationsthatplayasignificant roleindetermining theoverallgeometry
+andconfiguration ofthetruss.Sizevariablesareusedtodefinethecross-
+sectionalareaofthemembers, whichdirectlyaffectsthemechanical
+properties ofthestructuresuchasstrengthandstiffness.Acompre-
+hensivetrussdesignstartswithtopologyoptimization, thenshape
+optimization, andfinallysizeoptimization (Panagant etal.,2019).
+Manyresearches relatedtotopologyandshapeoptimization arewell
+established (Panagantetal.,2021).Inthiswork,trusssizeoptimization
+isinvestigated withthegoaloffindingtheappropriate cross-sectional
+areaofthememberstoreducethestructural massandcompliance.
+Themathematical modelofmulti-objective trussoptimization canbe
+described asminFAMCCC
+M̂n
+i1ρi⋅Ai⋅LiC
+CDTFC
+F̂n
+i1Ei⋅Ai
+Li⋅KiC
+sBtBgiA†σmax† σallow⩽0C
+where AA1CA2CBBBCAnC
+Amin
+i⩽Ai⩽Amax
+iCi1C2BBBCnC(2)
+whereMisthetotalmassofthetruss,Cisthecompliance ofthetruss,n
+isthenumberoftrussmembers, ρiisthematerialdensityofthei-thtruss
+member,Aiisthecross-sectional areaofthei-thtrussmember,Liisthe
+lengthofthei-thtrussmember, Ddenotesthenodaldisplacement ma-
+trix,Fdenotestheexternalloadmatrix,Eiistheelasticmodulusofthe
+i-thtrussmember,Kiisthestiffnessmatrixrelatedtothei-thtruss
+member, σmaxisthemaximum stress,and σallowistheallowable
+maximum stress.
+Thestructural massofthetrussisdetermined bythecross-sectional
+areaandmaterialdensityofthemembers. Thestiffnessofthestructure
+iscalculated usingalinearfiniteelementapproach. Asaresult,the
+compliance value,whichistheproductofthenodaldisplacement and
+externalforcevectors,isameasureoftheglobalstiffnessmatrix(Eid
+etal.,2022).Duringtheoptimization process,theconstraint handling
+methodisutilizedtotransform theconstrained optimization problem
+intothecorresponding unconstrained optimization problem.Thefitness
+valueafterprocessing theconstraint penaltycanbedefinedas
+wheremdenotesthenumberofconstraints.
+3.Proposed hyper-heuristic algorithm
+3.1.Designoftheguidancemechanism
+IntheproposedHHEA-PPO algorithm, theguidancemechanism is
+realizedbythedynamicselectionofhigh-level strategy(HLS)andlow-
+levelheuristics (LLHs).Inthefollowing, thedesignoftheguidance
+mechanism isexplained indetail.
+3.1.1.Designofhigh-levelstrategy
+TheHLSisrealizedbyaPPO-based stochastic strategy,whichin-
+cludesthefollowing aspects:statespaceconstruction, actionspace
+design,andrewardmechanism design.
+(1)Thestatespaceconsistsofthreeparts:thepositiondifference
+betweenthecurrentindividual andtheoptimalindividual, thepopu-
+lationdiversityinthedecisionspace,andthepopulation diversityinthe
+objectivespace.Bytakingthisinformation intoaccount,theHLScan
+moreaccurately determine whetheranindividual shouldbeexploredor
+exploited.
+(2)Theactionspaceconsistsoftenpredefined LLHs.TheseLLHs
+haveshownexcellentperformance invariousoptimization problems. By
+dynamically selectingtheseLLHs,theHLScanexpandthesearchspaceFA|
+⨆⨆〈
+⨆⨆⎜MCCĈm
+i1max⊔giAC0⊓0C
+maxMCmaxC̂m
+i1max⊔giAC0⊓CotherwiseC(3)S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+4 andimprovethesearchefficiency ofthealgorithm.
+(3)Therewardmechanism isusedtoevaluatetheeffectiveness ofthe
+actions(selectedLLHs)performed ineachstate.Specifically, iftheLLH
+improvesthefitnessoftheindividual, itreceivesapositivereward;ifit
+doesnotimprove,itreceivesnorewardoranegativereward.This
+designmakesthealgorithm focusmoreonwhetherthereisan
+improvement ratherthanthemagnitude oftheimprovement, thereby
+increasing thestabilityofstrategylearning.
+3.1.2.Selectionoflow-levelheuristics
+TheHLSdynamically selectsthemostappropriate LLHthroughthe
+PPOalgorithm foroptimization atdifferentstagesofevolution. The
+specificprocessisasfollows:
+Step1:Initializethepolicyandvaluenetworks. Usingthestatein-
+formation ofthepopulation, thepolicynetworkgenerates theproba-
+bilitydistribution ofactions,andthevaluenetworkevaluatesthevalue
+ofthecurrentstate.
+Step2:Actionselectionandexecution. According totheprobability
+distribution generated bythepolicynetwork,aLLHisselectedby
+randomsamplingandappliedtothecurrentpopulation togenerate
+offspring.
+Step3:Rewardevaluation andpolicyupdate.Therewardvalueof
+theselectedLLHisevaluated bythefitnesschangesoftheoffspring,and
+thepolicynetworkandvaluenetworkareupdatedbythePPO
+algorithm.
+Withthedesignoftheaboveguidancemechanisms, HHEA-PPO is
+abletoeffectively selectthemostsuitableLLHdynamically invarious
+optimization problems, whichensuresefficientglobalsearchcapability
+andimprovesconvergence accuracyandstability.Theeffectivecombi-
+nationofthesemechanisms enablesHHEA-PPO todemonstrate strong
+performance insolvingmulti-objective trussoptimization problems.
+3.2.PPO-based high-levelstrategy
+Inthissection,aPPO-based HLSisproposedtodynamically select
+appropriate LLHs.TheHHEA-PPO ismainlydividedintotwoparts:HLSandLLH.ThePPOalgorithm isusedtodesigntheHLS,andtheLLHis
+adaptively selectedatdifferentevolutionary stagesthroughfeedback
+signals.Theframework ofHHEA-PPO isshowninFig.1.
+3.2.1.Proximalpolicyoptimization
+Selection-based hyper-heuristic algorithms adapttodifferentprob-
+leminstances andoptimization objectives bydynamically selecting
+LLHs.Inthispaper,anonlinelearningmechanism isdesignedtousethe
+PPOalgorithm forHLStraining.Theonlinelearningmechanism com-
+binestheneuralnetworktrainingprocesswiththepopulation evolution
+process,sothattheHLScanguidethealgorithm toselectsuitableLLHs
+inrealtimeduringtheiterationprocess.Thisonlinelearningmechanism
+improves theadaptability andconvergence performance ofthealgo-
+rithm,andavoidsthehightimecostandinefficiency associated with
+traditional offlinetrainingmethods.ThePPO(Schulman etal.,2017)is
+considered anadvanced policy-based deepreinforcement learningal-
+gorithmthatcanbeusedtotrainanagent(i.e.,HLS)toselectLLHsfor
+superiorperformance. Compared totrustregionpolicyoptimization
+(TRPO)(Schulman etal.,2015),PPOissimpler,moreversatile,andhas
+bettersamplingefficiency. ThecoreideaofPPOistooptimizethepolicy
+iteratively, ensuringthatchangesinthepolicyspacecorrespond to
+performance changeswithinacontrollable rangetoensuretraining
+stability.Inthedesignofadaptivealgorithms, PPOoutperforms DQN(Yi
+etal.,2023).TheobjectivefunctionofPPOis
+maxLθ}Etminrtθ}AtCcliprtθC1 εC1ε}AtC (4)
+whereLθdenotestheobjectivefunctionofthepolicy, θdenotesthe
+parameters ofthepolicy,rtθπθa†sEπθolda†sistheprobability ratio
+betweenthecurrentpolicyandtheoldone,}Atistheestimated valueof
+theadvantage function attimestep t,cliprtθC1 εC1ε≜
+maxminrtθC1εC1 εdenotesthemotivation totrimactions
+outsidetherangeof1 εand1ε,and εistheextentoftheclipping
+(Schulman etal.,2017).If}AtF0,itindicatesthatthevalueofthis
+actionishigherthantheaveragelevel,maximizing Lθwillincrease
+rtθ,butitwillnotexceed1ε.Conversely, if}AtD0,maximizing Lθ
+Fig.1.Theframework ofHHEA-PPO.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+5 willdecreasertθ,butitwillnotbringitbelow1 ε.
+ThepolicywithTtimestepsisrunandthepolicyisupdatedusingthe
+collectedsamples(Schulman etal.,2017).Atruncated versionofthe
+generalized advantage estimation methodisutilizedtoestimatethe
+advantage function}At.Itcanbeexpressed as
+}At̂T t1
+l0γλlδtlC
+δtrtγVst1 VstC(5)
+where γ∃0C1isthediscountfactor,whichdetermines thesignificance
+offuturerewards. λ∃0C1isthedecayrateoftheadvantage function,
+whichisusedtoattenuatefuturerewardswhencalculating theempir-
+icaladvantage estimate. Ifλ0,then}Atδt,onlyconsiders the
+advantage obtainedfromaone-stepdifference isconsidered; ifλ1,
+then}At⋃T t1
+l0γlrtl Vst,thefullyaveragedadvantage obtained
+fromeachstepdifference istakenintoaccount.
+Byinteracting withprobleminstances, PPOtrainstheagentonlineto
+learnanHLS.Duringthetrainingprocess,theagentadjuststhepolicy
+parameters usingthecurrentstateandthefeedbackfromtheobjective
+functiontoachievethegoalsofgenerating ahigh-performance HLSand
+selectingthemostappropriate LLH.WiththePPOalgorithm, HHEAis
+abletolearnadaptivestrategies acrossdifferentprobleminstances,
+improving convergence accuracyandstabilityinmulti-objective truss
+optimization problems. Thepseudocode forthePPOalgorithm ispre-
+sentedinAlgorithm 1.
+Algorithm 1:Proximalpolicyoptimization
+Input:Aπθ(actornetwork),Vϕ(criticnetwork),RB(replaybuffer), γ(discountfactor),
+λ(parameter ofbias-variance tradeoff), ε(cliprange)
+1.Extract⊔⊑siCopiC√ropiCsi1⊒⊓Ci1CBBBCNfromRB;
+2.Calculatethetemporaldifference error δt;
+3.Computetheadvantage function}Atusing Eq.(5);
+4.Computetheoldlogarithmic probability;
+5.forepoch1Bepochs
+6.EvaluatethelossandgradientforactorAπθandcriticVϕ;
+7.Updatetheθand ϕusingtheAdamalgorithm;
+8.endfor
+Output:trainedAπθʹandVϕʹ
+3.2.2.Statespacedesign
+Inreinforcement learning,statestypicallyrepresentfeaturesofthe
+externalenvironment. Thestatespaceinthispaperconsistsofthree
+parts:thepositional difference betweenthecurrentindividual andthe
+optimalindividual, thediversityofthepopulation inthedecisionspace,
+andthediversityofthepopulation intheobjectivespace.Indesigning
+thestatespace,existingresearchoftendirectlyusestheindividual ’s
+positionasthestate(Tianetal.,2023).Althoughtheindividual ’spo-
+sitionisfundamental information foroffspringgeneration, considering
+onlythecurrentpositionisinsufficient toprovideeffectiveinformation
+forHLStoselectLLH.Animproved approachistoincorporate thepo-
+sitionaldifference betweenthecurrentindividual andtheoptimalin-
+dividualaspartofthestate.Thisallowsabetterjudgment ofwhether
+theindividual ’spositionismoresuitableforexploration orexploitation,
+therebydetermining theupdatestrategyforeachdecisionvariable.
+Furthermore, thediversityofthepopulation inthedecisionspacere-
+flectsthedistribution ofindividuals inthedecisionvariables, guiding
+theHLStoexploreandexploitthesolutionspacemoreeffectively. The
+information aboutthediversityofthepopulation intheobjectivespace
+reflectsthedistribution ofindividuals intermsofobjectivefunction
+values,whichiscrucialforenhancing thebreadthanduniformity ofthe
+searchspace.Therefore, thestateoftheagentcanberepresented by
+sxi gbCdivXCdivFXC (6)
+where xiistheindividual ’scurrentposition,andgbistheoptimalpo-
+sitionfoundsofar.divXanddivFXrepresent thepopulation di-
+versityinthedecisionspaceandobjectivespace,respectively. Diversitycanbemeasured bythedistancebetweenindividuals, asindicatedby
+divX1
+NN 1̂N
+i1̂N
+j1distxiCxjC (7)
+divFX1
+NN 1̂N
+i1̂N
+j1distFxiCFxjC (8)
+wheredistxCyrepresents theEuclidean distancebetween xandy,and
+Nisthesizeofthepopulation. Fxisthefitnessvalueevaluated ac-
+cordingtoEq.(3),whichincludesthepenaltyfortheconstraint
+violations.
+3.2.3.Actionspacedesign
+TheLLHinHHEA-PPO corresponds totheactioninreinforcement
+learning,i.e.,a∃⊔LLH1CLLH2CBBBCLLHn⊓.ThedesignoftheLLH,asa
+criticalcomponent ofHHEA,hasasignificant impactontheefficiencyof
+thealgorithm. Therearetenlow-levelheuristicoperations integrated
+intoHHEA-PPO toenhancethesearchcapability andadaptability ofthe
+algorithm. TheseLLHshavedemonstrated superiorperformance in
+variousoptimization problems(Tianetal.,2023).Combining themfor
+adaptiveco-evolution canenhancetheexploration capability ofthe
+HHEA.Adetaileddescription ofthesetenLLHsisgivenbelow.
+(1)LLH1isadaptedfromthegeneticalgorithm (GA)designedfor
+optimizing continuous variables, asshowninEq.(9)(Debetal.,2007).
+LLH1issuitableforlarge-scale searchspaces,exhibiting strongglobal
+searchcapability.
+x0B5[
+p1p2βp1 p2]
+C
+β|
+⨆⨆⨆⨆〈
+⨆⨆⨆⨆⎜2μ1
+η1C μ⩽0B5C
+21 μ 1
+η1CμF0B5C(9)
+where μisarandomnumbertakenfrom(0,1),and η20isan
+adjustable parameter.
+(2)LLH2isderivedfromthePSO,asillustrated inEq.(10)(Kennedy
+&Eberhart, 1995).LLH2hasstronglocalsearchcapability andfast
+convergence speed.
+xʹxw⋅vr1pi
+b xr2gb xC (10)
+where visthevelocityoftheparticle,r1andr2arerandomnumbers
+takenfrom(0,1), pi
+bisthehistoricaloptimalpositionofindividual i,and
+gbisthehistoricaloptimalpositionofthepopulation.
+(3)LLH3⊃LLH8areadaptedfromthedifferential evolution(DE),as
+showninEq.(11)(Storn&Price,1997).Theseoperatorsexhibitgood
+adaptability forhigh-dimensional, non-smooth, andnon-convex prob-
+lems,allowingthemtojumpoutoflocaloptimaincomplexlandscapes.
+xʹxFp1 p2C
+xʹgbFp1 p2C
+xʹxFp1 p2Fp3 p4C
+xʹgbFp1 p2Fp3 p4C
+xʹxKx p1Fp2 p3C
+xʹxKx p1Fp2 p3Fp4 p5C(11)
+whereF0B5andK0B5areadjustable parameters, gbisthebest
+positionfoundsofar.
+(4)LLH9istakenfromthefastevolutionary programming (FEP),as
+showninEq.(12)(Yaoetal.,1999).LLH9providesbetterperformance
+oncoverageoptimization tasksbystrikinganexcellentbalancebetween
+exploration andexploitation.
+xʹxv⋅eτ1rg
+i1τ2rg
+i2⋅rc
+iC (12)S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+6 where τ11E⎪⎪⎪⎪⎪⎪
+2n♠
+,τ21E⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪
+2⎪⎪⎪n♠⇓
+,nisthedimension ofthedecision
+variable,rc
+iandrg
+idenoterandomnumberswithCauchyandGaussian
+distributions, respectively.
+(5)LLH10istheuniformmutation(UM)operator,asshowninEq.
+(13)(Deb,2011).LLH10caneffectively maintainthepopulation di-
+versityandiswell-suited forcomplexsearchspaces.
+xʹxrub lbC (13)
+whereriisarandomnumbertakenfrom(0,1),uiandliaretheupperand
+lowerboundsofthei-thdecisionvariable.
+ThesetenLLHoperatorsprovideHHEA-PPO withavarietyofsearch
+strategies, allowingittoexplorethesolutionspaceofmulti-objective
+trussoptimization problems morecomprehensively. Theprocessof
+selectingactionsforthePPOalgorithm involvesusingapolicynetwork
+Aπθtoinfertheprobability distribution oftakingeachactionovera
+givenstates.UnlikeDQN,PPOisastochastic policy-based algorithm
+wheretheoutput πθ⋅†sisaprobability distribution ratherthana
+deterministic action.Therefore, eachagentalsoneedstosampleanac-
+tion,i.e.,a⊃Sampπθ⋅†s.Subsequently, thesampledactionis
+executed,andtheagentinteractswiththeenvironment toobtainanew
+stateandreward.Thestochastic policyensuresthateachstatehasa
+certainprobability ofselectingdifferentactions,allowingthealgorithm
+toachieveagoodbalancebetweenexploration andexploitation.
+3.2.4.Rewardmechanism
+Therewardmechanism isakeycomponent oftheonlinelearning
+mechanism, usedtoevaluatetheeffectiveness ofactionsperformed in
+eachstate.Anewstatespaceandrewardmechanism aredesignedto
+enabletheagenttoeffectively learnthemappingfromstatestoactions.
+Byupdatingthepolicyparameters onlineinrealtime,thealgorithm can
+continuously optimizeitselfduringthesearchprocess,whichenhances
+itsadaptability tomulti-objective optimization problems.
+InHHEA-PPO, therewardvalueisusedasfeedbacktoevaluatethe
+effectiveness ofactionsperformed ineachstate.Therewardreflects
+whethertheexecution ofanactioncontributes toimprovetheoptimal
+solutionfoundsofar.Inswarmintelligence algorithms, lowerindividual
+fitnessimpliesacloserproximity totheglobaloptima.Theimprovement
+inpopulation qualitymeansapotentialmovement ofthepopulation
+towardspromising regions.Therefore, previousresearchhastypically
+considered theratiooffitnessimprovement astherewardforthe
+selectedLLH(Lietal.,2019;Zhang,Tang,etal.,2023).However,asthe
+algorithm iterates,theratiooffitnessimprovement maydecrease
+gradually orsharply,leadingtoinstability ofthelearnedpolicy.An
+improved approach istofocusonlyonwhethertheLLHbrings
+improvement, irrespective oftherateofimprovement. Thelearning
+objectivefortheagentistheexpectedimprovement probability ofthe
+LLHoveritsparentgeneration. Inmulti-objective optimization, thegoal
+istominimize allobjectivefunctions. Thus,iftheagentimproves a
+particular objectivefunction,therewardis1;ifitworsensaparticular
+objectivefunction,therewardis 1;otherwise, itis0.Forallobjective
+functions, iftheoverallfitnessbecomesbetterafterexecuting theLLH,
+therewardis1;otherwise, itis0.Consequently, therewardfortheagent
+executing theselectedLLHinthecurrentstateis
+}rLLHi|
+〈
+⎜1Ĉm
+i1riF0C
+0CotherwiseC
+ri|
+⨆⨆⨆⨆⨆〈
+⨆⨆⨆⨆⨆⎜1Cft
+LLHiDft
+iC
+ 1Cft
+LLHiFft
+iC
+0CotherwiseC(14)
+whereft
+idenotesthefitnessofthei-thindividual atthet-thiteration,
+andft
+LLHidenotesthefitnessoftheindividual generated bytheselectedLLH.Aftereachcreditassignment, thequadruple⨁
+st
+iCat
+iC}rat
+iCst1
+i⨂
+issavedasasampleinthereplaybuffer,providing sampledataforthe
+trainingofthepolicynetworkandvaluenetwork.
+3.3.Archivewithdynamiccrowdingdistance
+Manycrowdingdistancemethodshavebeenproposed, asshownin
+Table3.Mostofthesemethodsfocusonthediversityofthedecision
+spaceandtheobjectivespace,suchasSCD,CPD,CSCD,DCCD,andICD.
+IntheDSCmethod,non-dominated solutionsarerepresented inthree
+differentreferencespaces:thedecisionspace,theobjectivespace,and
+theunifiedspace.Bydynamically switchingbetweenthesethreespaces,
+thecalculation ofcrowdingdistancesisimproved tomaintaindiversity
+andbalanceinboththedecisionandobjectivespaces(Kahraman, Akbel,
+Duman,etal.,2022).Thesemethodsareaimedatsolvingmultimodal
+multi-objective optimization problems.
+Forgeneralmulti-objective problems, thefocusismainlyonthedi-
+versityoftheobjectivespace.TheDECDmethodcalculates crowding
+distances dynamically, solvingtheproblemoftraditional crowding
+distancemethodsthatmayleadtoovercrowded orsparseregions.In
+addition,theSDEmethodincorporates convergence intothecrowding
+distancecalculation. Byevaluating theshifteddiversityoftheobjective
+Table 3
+Innovative methodsproposedtoimprovethecrowdingdistancecalculation.
+Research Method Characteristics
+(Yueetal.,2018)Specialcrowding
+distance(SCD)Anindex-based ringtopologyis
+usedtofindmoreParetooptimal
+solutions, andaspecialcrowding
+distanceandenvironmental
+selectioncriteriaareusedto
+obtainagooddistribution in
+decisionandobjectivespaces
+(Liuetal.,2019)Convergence-penalized
+density(CPD)Adoublek-nearestneighbor
+methodisusedtoensurediversity
+indecisionandobjectivespaces
+(Liangetal.,2021)Clustering-based special
+crowdingdistance
+(CSCD)Aclustering-based special
+crowdingdistancemethodand
+eliteselectionmechanism are
+usedtoimprovediversityin
+multimodal multi-objective
+optimization problems
+(Linetal.,2021)Dualclustering-based
+crowdingdistance
+(DCCD)Theinitialclustering isperformed
+inthedecisionspace,andnon-
+dominated solutionsineachlocal
+clusterareselectedtomaintain
+localParetoclustering, andthe
+secondclustering isperformed in
+theobjectivespace
+(Yueetal.,2021)Improved crowding
+distance(ICD)AweightedsumofEuclidean
+distancesisusedtoreplacethe
+crowdingdistanceinthedecision
+space
+(Kahraman, Akbel,
+Duman,etal.,
+2022)Dynamicswitched
+crowding(DSC)Improvesearchperformance of
+multi-objective algorithms by
+dynamically switching between
+differentreferencespaces
+(decisionspace,objectivespace,
+andaunifiedspacecombining
+both)
+(Zhaoetal.,2022)Dynamicelimination-
+basedcrowding
+distance(DECD)Thearchiveismaintained bya
+dynamicelimination mechanism,
+whileanon-dominated sorting
+strategyisincorporated tobuilda
+solutionupdatemechanism
+(Yinetal.,2023)Shift-based density
+estimation (SDE)Crowding distancecalculation is
+improved byashift-based density
+estimation method,which
+increasesthecrowdingdegreeof
+poorlyconverging individuals to
+increaseenvironmental selection
+pressureS.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+7 space,itallowssolutions withbetterconvergence tohavemore
+competitive crowding distances, therebyaccelerating theconvergence
+speed.
+Tomaintainthediversityandconvergence oftheParetoset,ady-
+namiccrowdingdistance(DCD)methodisintroduced andappliedtothe
+maintenance oftheexternalParetoarchive.Compared withtraditional
+crowdingdistancemethods,DCDmainlyfocusesonthediversityofthe
+objective spacebyincorporating constraint violationinformation. It
+onlydynamically calculates thecrowdingdistanceoftheneighbors of
+theremovedindividual, resultinginlowercomputational complexity.
+PreviousDCDmethodsrequirerecalculating thecrowdingdistancefor
+allremaining solutionswhenonesolutionisremoved,leadingtohigher
+computational complexity, especially whentherearealargenumberof
+solutions(Luoetal.,2023;Yinetal.,2023).Fig.2illustrates thechange
+incrowdingdistancebeforeandafterremoving asolution xiinatwo-
+objectivescenario.
+According toFig.2(a),beforeremoving thecurrentsolution xi,the
+crowding distanceoftheprevioussolution xi 1andthenextsolution
+xi1adjacenttothei-thsolutionis
+Dxi 1̂m
+k1†fkxi fkxi 2†
+maxfk minfkC (15)
+Dxi1̂m
+k1†fkxi fkxi2†
+maxfk minfkC (16)
+wheremisthenumberofobjectives. According toFig.2(b),after
+removingthecurrentsolution xiwiththeminimum crowdingdistance,
+thecrowdingdistancesoftheprevioussolution xi 1andthenextsolu-
+tionxi1adjacenttothei-thsolutionarechangedto
+Dxi 1̂m
+k1†fkxi1 fkxi 2†
+maxfk minfkC (17)
+Dxi1̂m
+k1†fkxi 1 fkxi2†
+maxfk minfkB (18)
+Theinteraction betweenthepopulation andthearchiveiscrucialto
+ensuretheconvergence anddiversityofsolutions. InHHEA-PPO, the
+archiveservesasanexternalmemoryrepository tostorethePareto
+optimalsolutionsfoundduringtheoptimization process.Specifically,
+afterthepopulation generates offspring, non-dominated sortingand
+DCDareusedtocomparetheoffspringwiththeparents,andthebetter
+solutionsareselectedtoupdatethepopulation. Theupdatedpopulation
+isthenmergedwiththearchivetoformacombined solutionset,which
+isre-evaluated usingnon-dominated sortingandDCD.Throughthisinteraction, theexternalParetoarchiveisperiodically updatedtoensure
+thatitcontainsonlywell-distributed Paretosolutionsintheobjective
+space,therebymaintaining thediversityandconvergence ofthesolu-
+tions. Algorithm 2providesthepseudocode forupdatingtheexternal
+ParetoarchiveusingDCD.
+Algorithm 2:Updatearchivewithdynamiccrowdingdistance
+Input:Ae(externalParetoarchive),Pt(currentpopulation), N(capacityofthe
+archive)
+1.//Population-Archive Interaction
+2.Combinethearchivewiththepopulation Ae←⊔Ae}Pt⊓;
+3.Sortindividuals byfitnessvalues;
+4.Calculatethecrowdingdistanceofindividuals;
+5.ifsizeAeFN
+6.//DynamicCrowding Distance
+7. fori1BsizeAe N
+8.Removesolution xiwiththeminimum crowdingdistancefromAe;
+9.Updatethecrowdingdistanceofxi 1using Eq.(17);
+10. Updatethecrowdingdistanceofxi1using Eq.(18);
+11. endfor
+12. endif
+Output:updatedParetoarchiveAe
+Afterremoving asolutionusingtheDCDmethod,onlythecrowding
+distancesofneighboring solutionsneedtoberecalculated, thusreducing
+thecomputational complexity fromOTMN2toOTMN,whereNisthe
+population size,Misthenumberofobjectivefunctions, andTisthe
+maximum numberofiterations. TheDCDmethoddemonstrates obvious
+advantages whendealingwithalargenumberofnon-dominated solu-
+tions.Assuming thereare100non-dominated solutionsandthetaskisto
+remove50ofthem,theeffectiveness oftheDCDmethodisillustrated in
+Fig.3.TheinitialscenarioisdepictedinFig.3(a),while (b)and(c)
+presenttheprocessing resultsofthecrowdingdistance-based andDCD-
+basedexternalarchives,respectively. TheresultsindicatethattheDCD-
+basedexternalarchivehasbetterdiversityofsolutionscompared tothe
+traditional crowdingdistance-based one.
+3.4.ProcedureofHHEA-PPO
+Thepseudocode oftheHHEA-PPO ispresented inAlgorithm 3.The
+execution stepsoftheHHEA-PPO canbedecomposed intothefollowing
+stages.
+(1)Initialization (steps1–7):Initializethepositionofthepopulation,
+theparameters ofthepolicynetworkandthevaluenetwork.
+(2)Parentselection(step9):Selecttheparentsthatwillbeusedto
+generateoffspring.
+(3)LLHselection(steps10–14):According totheprobabilities
+inferredbythepolicynetwork,selectasetofactionsforeachindividual,
+i.e.,selectapredefined LLHtogenerateoffspring.
+Fig.2.Changesincrowdingdistanceafterremoving asolution xiusingDCD.(a)Beforethesolutionisremoved.(b)Afterthesolutionisremoved.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+8 (4)Rewardevaluation (steps15–17):Evaluatewhethertheoffspring
+improvesupontheparentstodetermine whethertheselectedLLHre-
+ceivesareward.
+(5)Positionupdate(steps18–19):Updatethepositionoftheoptimal
+individual foundsofar,whichisusedtoguidetheevolution ofthe
+population andtheselectionoftheLLH.
+(6)Datacollection andtraining(steps20–23):Buildthereplaybuffer
+ofsampledatafortrainingthepolicynetworkandvaluenetworkof
+PPO.Ineachiteration,PPOistrainedforaspecifiednumberofepochs
+(seeAlgorithm 1).
+(7)MaintaintheParetoarchive(steps24–27):Usethedynamic
+crowdingdistancetomaintainthediversityoftheParetoarchive.
+Algorithm 3:Procedure oftheHHEA-PPO
+Input:N(sizeofthepopulation), QA(architectural parameters ofthenetwork), γ
+(discountfactor), λ(parameter ofbias-variance tradeoff),epochs(iterationofpolicy
+updates), ε(cliprange),lra(learningrateoftheactor),lrc(learningrateofthe
+critic),Tmax(maximum numberofiterations)
+1.Initializethepopulation XandevaluatefitnessF;
+2.Executethenon-dominated sortingandevaluatecrowdingdistanceD;
+3.gb←Theindividual withthemaximum crowdingdistanceinthePF;
+4.InitializethepolicynetworkAπθ0andvaluenetworkVϕ0usingQA;
+5.InitializetheexternalarchiveAe;
+6.Evaluatethediversityofthepopulation indecisionandobjectivespace;
+7.Extracttheinitialstates0;
+8.fort1BTmax
+9.SelecttheparentPfrompopulation Xvia2-tournament selection;
+10. fori1BN
+11. Extractthestatest
+ipi gbCdivXCdivFX;
+12. SelectaLLHaccording tothepolicynetworkAπθtst
+iCat
+i;
+13. ApplytheselectedLLHtogeneratetheoffspring xi;
+14. endfor
+15.Evaluatethefitnessofoffspringpopulation X;
+16.EvaluatetherewardoftheselectedLLHusing Eq.(14);
+17.Compareoffspringtoparentpopulation andretainbetterindividuals;
+18.Executethenon-dominated sortingandevaluatecrowdingdistanceD;
+19. gb←Theindividual withthemaximum crowdingdistanceinthePF;
+20.Evaluatethediversityofthepopulation indecisionandobjectivespace;
+21.ExtractthestatestX gbCdivXCdivFX;
+22.ReplaybufferRb←Thetuple}〉
+st
+iCLLHiC}rLLHiCst1
+i⃒〈
+Ci1C2CBBBCN;
+23.Updatetheparameters oftheactorandcriticnetworkviaAlgorithm 1;
+24.UpdatetheParetoarchiveAeusing Algorithm 2;
+25. endfor
+Output:externalParetoarchiveAe
+4.Experimental studies
+4.1.Experimental settings
+Eightmulti-objective trussoptimization problems, comprising
+trusseswith10,25,37,60,72,120,200,and942bars,wereemployed
+toevaluatethealgorithm ’sperformance (Panagant etal.,2021).The
+materialcharacteristics andallowable stressesarethesameforallof
+thesetrusses.Thematerialdensity,elasticmodulusandpermissible
+stressesaresetto7850kgEm3,200×109Pa,and400×106Pa,respec-
+tively.Considering thatconventional sizeofthebarsisusually
+restricted, thesizeofeachstructural unitisplannedasadiscretevariable.Foralltrussesexceptthe942-bar,theminimum cross-sectional
+areaofthebarsis10 3m2,themaximum cross-sectional areais2B1×
+10 2m2,andtheintervalbetweenvariablesis5×10 4m2.Inthe942-
+bartrussproblem,theminimum cross-sectional areais10 3m2,the
+maximum cross-sectional areais10 1m2,andtheintervalbetween
+variablesis10 3m2.Fig.4illustrates thetopologies andshapesofthese
+trussproblems, includingplanartrusseswith10,37,60,and200bars,as
+wellasspatialtrusseswith25,72,120,and942bars.Sincethesym-
+metryofthetrussstructure, designvariablesaretypicallygroupedin
+advance.Therefore, duringtheoptimization process,thenumberof
+designvariablesisusuallylessthanthenumberoftrussmembers. The
+numberofdesignvariablesinthispaperis10,8,15,25,16,7,29,and59
+corresponding tothe10,25,37,60,72,120,200,and942barstruss
+problems, respectively.
+Toevaluatetheperformance ofHHEA-PPO, itwascompared with
+thirteenalgorithms, including classicalNSGA-II(Debetal.,2002),
+multi-objective cuckoosearch(MOCS)(Yang&Deb,2013),dual-
+population algorithm basedonalternateevolution anddegeneration
+(CAEAD)(Zouetal.,2021),helper-problem-assisted constrained multi-
+objectiveevolutionary algorithm (MSCEA)(Zhang,Tian,etal.,2023),
+IBMSMA(Yinetal.,2023),RPBILDE(Anosrietal.,2022),SHAMODE-
+WO(Carvalhoetal.,2021;Panagantetal.,2019),dynamicswitched
+crowding basedmulti-objective symbiotic organism searchalgorithm
+(DSC-MOSOS) (Ozkaya,Kahraman, etal.,2024),multi-objective PSO
+usingringtopologyandspecialcrowdingdistance(MO-Ring-PSO-SCD)
+(Yueetal.,2018),improved multi-objective mantarayforagingopti-
+mization (IMOMRFO) (Kahraman, Akbel, &Duman, 2022),
+decomposition-based multi-objective evolutionary algorithm withdeep
+Q-network (MOEA/D-DQN) (Tianetal.,2023),hyper-heuristic evolu-
+tionaryalgorithm withdeepQ-network (HHEA-DQN), andHHEA-PPO
+withdynamically switched crowding distance(HHEA-PPO-DSC).
+Amongthem,NSGA-IIandMOCSareclassicalevolutionary andswarm
+intelligence algorithms. CAEADandIBMSMAutilizemultipleswarmco-
+evolutionary frameworks. MSCEAhelpstheagenttobetterexplorethe
+solutionspacebyintroducing anauxiliary problem. RPBILDE and
+SHAMODE-WO areregardedasstate-of-the-art algorithms formost
+multi-objective trussproblems (Panagant etal.,2021).DSC-MOSOS,
+MO-Ring-PSO-SCD, andIMOMRFO arepowerful andrecentmulti-
+objectiveoptimization algorithms thatintegrateadvanced methodsfor
+crowding distanceestimation. MOEA/D-DQN isanadaptiveoperator
+selectionalgorithm usingadeepQ-network, similartohyper-heuristic
+algorithms. HHEA-DQN andHHEA-PPO havethesameLLHset,
+differingonlyintheHLS,andisusedtoverifywhetherthePPO-based
+HLSoutperforms DQN.HHEA-PPO-DSC isusedtovalidatetheeffi-
+ciencyofDCD.Toensureafaircomparison, theparameters ofallal-
+gorithmsweresetaccording totheiroriginalliterature, asdetailedin
+Table4.AllcodeswererunonMATLABR2022bwithWin11OS,Intel®
+Core ™i7-13700H CPU(2.40GHz)and32GBRAM.Experimental data
+werecollectedusingPlatEMO4.5(Tianetal.,2017),andthedefault
+parameters oftheplatforms wereusedunlessotherwise stated.
+Fig.3.Comparison ofarchiveupdatingmethods.(a)Initialarchive.(b)Archiveupdatedbytraditional crowdingdistance.(c)ArchiveupdatedbyDCD.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+9 Fig.4.Topologyoftrussoptimization problems.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+10 4.2.Performance metrics
+Hypervolume (HV)(Whileetal.,2006):SincethetruePFofthetruss
+problemisnotavailable,theHVisusedasaperformance metric.TheHV
+valueiscalculated as
+HVPFCr∗̃†PF†
+i1vPFiCr∗C (19)
+where†PF†denotesthenumberofsolutions,andvPFiCr∗represents the
+hypervolume createdbetweenthei-thsolutionandthereferencepoint
+r∗.Duringthecalculation ofHV,thereference pointforeachtruss
+problemwas1.1timesthelargestobjectivevalueobtainedfrom30
+randomrunsofallalgorithms. Thereferencepointsfortheeighttruss
+optimization problemsarelistedinTable5.
+Toevaluatethetimeandstabilityoffindingfeasiblesolutionswhen
+solvingtrussproblems, themethodsfromthereferences (Dumanetal.,
+2021;Gürgenetal.,2022)areemployed. Specifically, thesuccessrate
+(SR),averagecalculation durations (ACDs),andaveragenumberof
+fitnessevaluations (AFEs)areusedtofurtherevaluatetheperformanceofthealgorithms. Toobtaintheseparameters, itisnecessary todefine
+feasiblesolutions.
+Feasiblesolution(FS):TheFSisdifferentfromthefeasiblesolutionin
+constrained optimization problems (solutions thatsatisfyallthecon-
+straintsoftheproblem). Forspecificdescriptions, pleasereferto(Oztürk
+&Kahraman, 2023).Inthisstudy,FSisdefinedbytheaverageHVofthe
+competing algorithms. Specifically, forthei-thtrussproblem,itsFScan
+beexpressed as
+FSi1
+NCÂNCA
+j11
+K̂K
+k1HViCjCkC (20)
+whereHViCjCkrepresents theHVvalueofthei-thproblemforthej-th
+algorithm inthek-thrun,NCAisthenumberofcompeting algorithms,
+andKisthenumberofindependent runs.TheFSscalculated forthe
+eighttrussproblemsarelistedinTable6.
+Successrate(SR):SRisusedtodetermine thefrequency withwhich
+analgorithm successfully findstheFS.Itcanbedefinedas
+SRk
+K×100C (21)
+wherekisthenumberofsuccessful runswheretheFSisfound,andKis
+thetotalnumberofruns.
+Averagecalculation durations (ACDs):ACDsrepresenttheaverage
+timetakenbythealgorithm tofindtheFS,calculated onlyforsuccessful
+runs.Itcanbeexpressed as
+ACDs1
+k̂k
+j1tCDjC (22)
+wherekisthenumberofsuccessful runs,andtCDjisthetimetakento
+findafeasiblesolutioninthej-thsuccessful run.
+Averagenumberoffitnessevaluations (AFEs):AFEsquantifythe
+averagecomputational effortrequiredbyanalgorithm tofindtheFS,
+calculated forsuccessful runs.Itisdefinedas
+AFEs1
+k̂k
+j1FEsjC (23)
+whereFEsjisthenumberoffitnessevaluations neededtofindtheFSin
+thej-thsuccessful run.Thesemetricsprovideacomprehensive evalua-
+tionofthealgorithm ’sperformance, including solutionquality,
+computational complexity, andstability.
+4.3.Experimental resultsandanalysis
+4.3.1.Overallperformance analysis
+ThemeanandstandarddeviationofHVforallcompeting algorithms
+arelistedinTable7,andstatistical analyseswereperformed using
+Friedman ’saveragerankingandWilcoxon ranksumtest.Theresults
+showthatHHEA-PPO obtainedtheoptimalHVvaluesinthesixtruss
+problemsandoutperformed thecompeting algorithms notonlyinterms
+ofaverageconvergence accuracy, butalsointermsofstability.Ac-
+cordingtotheFriedman ’saverageranking,HHEA-PPO ranksfirst
+overall,followedbyIBMSMAandSHAMODE-WO. Intermsofaverage
+HVresults,HHEA-PPO improved by0.30%and0.12%overIBMSMA
+andSHAMODE-WO, respectively. Thesethreealgorithms adopted
+multi-swarm collaboration strategies, indicating thatmulti-swarm
+collaboration isanefficientsearchstrategyintrussoptimization. In
+HHEA-PPO, agentsselectLLHsbythestateoftheindividual, allowing
+themtousemultipleLLHsinasingleiteration.Thisissimilartomulti-
+swarmcooperation, butwithmorepreciseselection. AlthoughHHEA-
+PPOperformswellonmostproblems, itisinferiortoIBMSMAand
+HHEA-DQN onthe25-bartrussproblem. CAEADsignificantly out-
+performsHHEA-PPO onthe60-bartrussproblem.ThiswillbeanalyzedTable 4
+Parameter settingsofthecompeting algorithms.
+Algorithm Parameter
+IMOMRFO Scalingfactors2.
+SHAMODE-WO Memorysizeh5;memoryindexk1.
+MSCEA Decreasetrendofthedynamicconstraint boundarycp5.
+MOCS Discovery probability pa0B25;shapeparameter ofL˘evyflight
+β3E2.
+MO-Ring-PSO-
+SCDMaximum sizeoftheindividual bestarchivenPBA5;maximum
+sizeoftheneighborhood bestarchivenNBA3⋅nPBA.
+CAEAD Initial εvalue εk108;minimum εvalue εmin10 4;change
+threshold δthreshold10 2;maxchange δmax1;proportion
+factor τ0B05.
+IBMSMA Randomresetprobability z0B03;maximum regrouping
+intervaliterationNmax40;minimum regrouping interval
+iterationNmin10;scalingfactorsrand0B2C0B8.
+RPBILDE Learningratelr00B25;mutationprobability mp0B05;
+mutationshiftms0B2;crossoverprobability pc0B7;scaling
+factors0B8;selectingprobability ps0B5.
+MOEA/D-DQN Discountfactor γ0B5;learningratelr0B01;sizeofreward
+windowis100;neighborhood sizeis10;frequency ofweights
+updateis0.05;numbersofneuronsinhiddenlayersare⊔128C256C
+128C64C32⊓;sizeofexperience replaypoolis512;minibatch size
+is16;updateintervaloftargetnetworkis10.
+HHEA-DQN Discountfactor γ0B5;learningratelr0B01;sizeofreward
+windowis100;numbersofneuronsinhiddenlayersare⊔32C64C
+32C16C16⊓;sizeofexperience replaypoolis100;mini-batch size
+is32;updateintervaloftargetnetworkis5;sizeofexternal
+archiveis100.
+HHEA-PPO Discountfactor γ0B98;parameter ofbias-variance tradeoff λ
+0B95;learningrateofactornetworklra0B001;learningrateof
+criticnetworklrc0B01;iterationofpolicyupdatesepochs10;
+cliprange ε0B02;numbersofneuronsinhiddenlayersare⊔32C
+64C32C16C16⊓;sizeofreplaybufferis100;mini-batch sizeis32;
+sizeofexternalarchiveis100.
+*Thepopulation sizeis100,themaximum numberofevaluations is50000,and
+theneuralnetworkistrainedusingtheAdamoptimizer (Kingma &Ba,2017).
+Table 5
+Reference pointsfortrussproblems.
+Problem Mass Compliance
+10-bar 2.113796e04 2.286985e05
+25-bar 1.518560e04 6.846669e04
+37-bar 7.460509e03 4.033068e04
+60-bar 1.134696e04 1.051983e05
+72-bar 3.867375e04 1.500580e05
+120-bar 1.140247e05 1.788624e06
+200-bar 1.596036e05 2.831675e05
+942-bar 3.934378e06 2.573770e05S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+11 indetailinthefollowing discussions. Inconclusion, HHEA-PPO per-
+formsexcellently onmostproblems, withsignificant advantages in
+convergence accuracyandstability.However, forthe25-barand60-bar
+trussproblems, HHEA-PPO stillneedstoimproveitsbalancebetween
+exploration andexploitation tofurtherenhanceitsperformance. In
+addition,themulti-swarm collaboration strategyshowssignificant ad-
+vantagesintrussoptimization.Fig.5(a)displaysthebestPFsobtainedbyIBMSMA, HHEA-DQN,
+andHHEA-PPO forthe25-bartrussoptimization problem.Itcanbe
+seenthatallthreealgorithms canfindanidealPF,butthedistribution of
+asmallnumberofsolutionsinHHEA-PPO ispoor.Thismaybeduetothe
+factthataftertheDCDmethodremovesthemostcrowdedsolutions,the
+solutionsgenerated byHHEA-PPO arenotasgoodasthoseremoved.
+Thisisbecausetherewardmechanism ofHHEA-PPO isdesignedtobeTable 6
+Feasiblesolutionsforeachtrussoptimization problem.
+Problem 10-bar 25-bar 37-bar 60-bar 72-bar 120-bar 200-bar 942-bar
+Feasiblesolution 0.680769 0.728839 0.752982 0.643146 0.741413 0.601100 0.829099 0.953455
+Table 7
+HVvaluesobtainedbyallcompeting algorithms.
+*Thebestresultisshowninbold,‘’,‘-‘and‘’aretheresultsoftheWilcoxonranksumtest,andFARindicatestheFriedman ’saverageranking.Ineachproblem-
+specificranking,blue,red,andyellowrepresentthefirst,second,andthirdalgorithms, respectively. Grayrepresents theothercompeting algorithms inthetop.Gray
+represents theothercompeting algorithms inthetoptenforthatproblem.
+Fig.5.OptimalPFsobtainedbyalgorithms. (a)25-bartrussproblem.(b)60-bartrussproblem.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+12 dependent onwhetherthereisimprovement ornot,notonthedegreeof
+improvement. Forthisproblem,IBMSMAandHHEA-DQN converge
+fasterinthelateriterations.
+Fig.5(b)illustrates thebestPFsobtainedbyCAEADandHHEA-PPO
+forthe60-bartrussproblem.ItisclearthatHHEA-PPO focusesmoreon
+optimizing thecompliance ofthetruss,whileCAEADfocusesmoreon
+optimizing themass.Intermsoftrussmass,thesolutionsobtainedby
+CAEADarebetterthanthecurrentreference PF,showingitsunique
+advantage inthisproblem.Infact,HHEA-PPO converges moreslowlyon
+thisproblemandhasnotyetreachedastateofconvergence stagnation
+(seeFig.6).AnotherreasonisthatthecrowdingdistanceinCAEADis
+notnormalized, whilethescalesofthetwoobjective functions are
+different.Incontrast,HHEA-PPO normalizes theobjectivefunctionsto
+obtainmoreuniformly distributed solutionsandthusfocusesmoreon
+optimizing thecompliance ofthetruss.
+Toanalyzetheconvergence processofHHEA-PPO andother
+competing algorithms, theaverageconvergence curvesofthesealgo-
+rithmsareplottedinFig.6.ItcanbeseenthatHHEA-PPO, HHEA-PPO-
+DSC,andHHEA-DQN showslowconvergence intheearlyiterations, but
+fasterconvergence inthelateriterations. Thisisduetothefactthatthey
+alluseonlinetrainingandonlineapplication foroptimization, which
+facilitates theiruse.Intheearlyiterations, theagentshavenotyet
+learnedeffectiveHLS,resultinginslowerconvergence. HHEA-PPO
+outperforms HHEA-DQN intermsofconvergence speedandaccuracy,
+exceptforthe25-bartrussproblem.Thisindicatesthatstochastic policy-
+basedPPOismoresuitableforHLSdesignthanvalue-based DQN.
+However, theresultsofthe25-bartrussproblemshowthatthePPOstill
+faceschallenges inbalancing exploration andexploitation. Inthis
+problem,HHEA-PPO converges rapidlyintheearlyiterations, andthe
+HLSquicklyreachesastablestate.Evenwiththestochastic policy,there
+isstillinsufficient exploration ofotherLLHsinthelateriterations. Asa
+result,HHEA-DQN withanε greedystrategyoutperforms HHEA-PPO
+inlateriterations. Moreover, HHEA-PPO-DSC, whichintegrates DSC,
+performsworsethanHHEA-PPO onalltrussproblems, indicating that
+DCDismoresuitableformulti-objective trussproblems. AlthoughDSC
+achievesagoodbalancebetweenthedecisionspaceandtheobjective
+space,considering thedistribution inthedecisionspacetendstoweaken
+theParetoadvantages intheobjectivespaceduetothemuchhigher
+dimension ofthedecisionvariablescompared totheobjectivespace.
+Therefore, theDCDthatfocusesontheconvergence oftheobjective
+spaceachievesbetterHVvalues.Insummary, HHEA-PPO performswell
+inmostcases,butstillneedstofindabetterbalancebetweenexploration
+andexploitation forspecificproblems. Inaddition,DCDismoresuitable
+thanDSCfordealingwithproblems withhigh-dimensional decision
+variables.
+TheHVresultsofallthecompeting algorithms oneighttrussprob-
+lemsareshowninFig.7,obtainedbyindependently running30ex-
+periments. ThisfigureshowsthatHHEA-PPO performswellonthe10-
+barand37-bartrussproblems, withthemedianandupperquartileof
+itsHVvalueshigherthanthoseoftheotheralgorithms, indicating its
+superiorandstableoverallperformance. IBMSMAandHHEA-DQN also
+performwell,butHHEA-PPO hasaslightadvantage intermsof
+convergence accuracyandstability.Forthe25-barproblem,IBMSMA
+performs thebestwiththehighestmedianHVvalueandamore
+concentrated distribution. HHEA-DQN comesnext,whileHHEA-PPO,
+althoughperforming wellintheearlystages,showsslightlyinsuffi-
+cientstabilityandconvergence speedinthelaterstages,resultinginits
+overallHVvaluebeingslightlylowerthanIBMSMAandHHEA-DQN. On
+the60-barproblem,CAEADperformswell,especially ontheupper
+quartileandmedianHVvalues,demonstrating itsuniqueadvantage on
+thisproblem.HHEA-PPO comesnext,althoughitsdistribution ismore
+centralized, itisslightlyslowerinconvergence speed.Forthe72-bar
+problem, theperformance ofHHEA-PPO andIBMSMAisrelatively
+close,butHHEA-PPO hasaslightadvantage intermsofstability.Forthe
+120-barand200-bartrussproblems, theperformance ofHHEA-PPO is
+stillexcellent,especially intermsofthemediananddistribution rangeoftheHVvalues,showingitsefficientconvergence performance. Espe-
+ciallyonthe200-barproblem,HHEA-PPO significantly outperforms
+otheralgorithms. Onthe942-barproblem,HHEA-PPO hasthemost
+concentrated distribution ofHVvaluesandthehighestmedian,indi-
+catingitshighperformance andstabilityonlarge-scale complex
+problems.
+Inaddition,MOEA/D-DQN performslesseffectively thanotheral-
+gorithmsonmostproblems. Thisisbecausethealgorithm lacksa
+constraint handlingmechanism andisnotsuitedtosolvetheproblem.
+Specifically, Fig.8showsthePFobtainedbyMOEA/D-DQN performing
+5000and10,000evaluations forthe60-bartrussproblem.Itcanbe
+observedthatMOEA/D-DQN optimizes onthebasisofthepre-assigned
+weights,andthenumberoffeasiblesolutionsbecomessmallerand
+smaller,resultinginworseHVvalues.
+4.3.2.Stabilityandefficiencyanalysis
+Inthestudyofoptimization algorithms, itiscrucialtoevaluatethe
+stabilityofthealgorithms. TofurtheranalyzethestabilityofHHEA-PPO
+andcompeting algorithms. Thisstudyevaluates theperformance and
+strengthsandweaknesses ofeachalgorithm ondifferentproblemsby
+analyzing threeindicators: SR,ACDs,andAFEs.
+SRmeasuresthepercentage ofalgorithms thatreachtheexpected
+goalinmultipleindependent runs.AhigherSRindicatesthatthealgo-
+rithmhasgoodstabilityandreliability ondifferentproblems. TheSRsof
+allcompeting algorithms arecountedinTable8.Itcanbeseenthatthe
+SRofdifferentalgorithms variessignificantly acrossthetrussproblems.
+HHEA-PPO achievesnearly100%successrateonalleighttrussprob-
+lems,showingthemoststableperformance. Intheeightproblems,
+HHEA-PPO improvestheSRby9.07%,60.27%,and45.67%compared
+toSHAMODE-WO, IBMSMA,andHHEA-DQN, respectively. SHAMODE-
+WO,CAEAD,andIBMSMAeachachievecloseto100%successrateon
+fourproblems. HHEA-DQN andHHEA-PPO-DSC performwellonthe25-
+barand942-barproblems, respectively, buttheiroverallSRisslightly
+lowerthanthetopfouralgorithms.
+ACDsevaluatetheaveragecomputation durationrequiredbythe
+algorithm tofindtheFS.ShorterACDsmeanthatthealgorithm canfind
+solutionsfasterwiththesamecomputational resources, demonstrating
+itscomputational efficiency. Table9recordstheACDsofeachalgorithm
+ondifferentproblems. ItcanbeseenthatIBMSMAhastheshortestACDs
+onthe10-bar,37-bar,and942-barproblems. HHEA-PPO hasthe
+shortestACDsonthe25-barand200-barproblems, anditsoverall
+performance issecondonlytoIBMSMA.CAEADhastheshortestACDs
+forthe60-barand120-barproblems. NSGA-IIhasthefastestsolution
+speedonthe72-barproblem.Itisnoteworthy thatdespitetheinclusion
+ofanonlinelearningprocess,HHEA-PPO ’sACDstoobtainFSarestill
+betterthanmostcompeting algorithms, indicating thatthePPO-based
+HLSishighlyefficient.
+TheSRandACDsofallthecompeting algorithms ontheeighttruss
+problemsareshowninFig.9.Ascanbeseen,HHEA-PPO hasahigherSR
+thanotheralgorithms foralleightproblems, andalsohasshorterACDs
+forthe25-bar,37-bar,200-bar,and942-barproblems, demonstrating its
+superioroverallperformance. Although IBMSMA hastheshortest
+overallACDs,itsSRislowerthanHHEA-PPO onthe37-bar,60-bar,72-
+bar,and120-barproblems, indicating agapinstability.CAEADshowsa
+balancedperformance inbothSRandACDs,butperformsslightlyworse
+onthe25-bar,200-bar,and942-barproblems.
+ACDsincludeboththeprocessing timeofcompeting algorithms and
+theevaluation timeofthetrussproblems. Forsmall-scale problems,
+ACDsaremainlyinfluenced bythealgorithm ’soperators, whilefor
+large-scale problems, ACDsaremainlyinfluenced bythenumberof
+fitnessevaluations. Toeliminate theinfluenceofthealgorithm ’spro-
+cessingtime,itisnecessary tocounttheeffectiveevaluations ofthe
+algorithms. Formostreal-world optimization problems, thefitness
+evaluation timeisusuallymuchhigherthanthealgorithm processing
+time.Therefore, thenumberoffitnessevaluations usuallybetterreflects
+theefficiency ofthealgorithm. TheAFEsofallcompeting algorithms onS.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+13 Fig.6.Averageconvergence curvesforallcompeting algorithms.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+14 Fig.7.HVresultsfor30independent runsofallcompeting algorithms.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+15 differentproblems arecountedinTable10.Itcanbeseenthat
+SHAMODE-WO hasthefewestAFEsonthe37-bar,60-bar,200-bar,and
+942-barproblems, demonstrating itsefficientoptimization capability.
+HHEA-PPO andCAEADhavethefewestAFEsonthe25-bar,10-bar,and
+120-barproblems, respectively, andalsohaverelatively lowAFEsonotherproblems, furtherverifyingtheirefficiency.
+Basedontheaboveanalysis,HHEA-PPO performswellinSR,ACDs,
+andAFEsmetrics,demonstrating itsstrongperformance intrussopti-
+mizationproblems. IBMSMA, SHAMODE-WO, andCAEADperform
+betterinACDsandAFEs,respectively. Amongthem,SHAMODE-WO is
+considered tobethemostadvanced algorithm forsolvingmulti-
+objective trussoptimization problems (Panagant etal.,2021).The
+value-based HHEA-DQN iscomparable toSHAMODE-WO intermsof
+averageconvergence accuracy, buthaslowerstability.Incontrast,the
+policy-based HHEA-PPO significantly outperforms SHAMODE-WO in
+termsofstability,validating theeffectiveness andefficiency ofthe
+policy-based PPO-assisted HHEA.
+5.Conclusion
+Inthisstudy,theHHEA-PPO algorithm isproposedtoimprovethe
+efficiency ofHHEAinsolvingmulti-objective trussoptimization prob-
+lemsbyintegrating PPO.TheHHEA-PPO algorithm improvestheper-
+formance ofmulti-objective trussoptimization throughthefollowing
+innovations: (1)ThePPO-based HLSeffectively handlescontinuous state
+spaces.(2)Theintegration oftendifferentLLHsenhancesthesearch
+capability. (3)TheDCDmechanism ensuresthediversityandconver-
+genceoftheParetoset.
+TheHHEA-PPO algorithm wastestedoneighttrussproblemsand
+compared withthirteenstate-of-the-art algorithms. Theexperimental
+resultsshowthatHHEA-PPO achievesthebestHVvaluesinsixoutof
+eighttrussproblems, andsignificantly outperforms thecompeting al-
+gorithmsintermsofconvergence accuracyandstability.According to
+theFriedman ’saverageranking,HHEA-PPO rankedfirstoverall,with
+averageHVvaluesimproved by0.30%and0.12%overIBMSMAand
+Fig.8.Convergence analysisofMOEA/D-DQN onthe60-bartrussproblem.
+Bluedenotesindividuals inthecurrentpopulation thatdonotsatisfycon-
+straints,andyellowdenotesthePFcomposed offeasiblesolutions. NFEdenotes
+thenumberoffunctionevaluations. (Forinterpretation ofthereferences to
+colourinthisfigurelegend,thereaderisreferredtothewebversionof
+thisarticle.)
+Table 8
+Successrates(%)ofallcompeting algorithms.
+Algorithm 10-bar 25-bar 37-bar 60-bar 72-bar 120-bar 200-bar 942-bar FAR
+HHEA-PPO 100 100 100 100 100 100 100 100 1.88(1)
+SHAMODE-WO 100 70 100 93.33 86.67 93.33 100 100 3.38(2)
+CAEAD 100 33.33 100 100 93.33 100 53.33 0 4.38(3.5)
+IBMSMA 100 100 50 50 26.67 93.33 100 100 4.38(3.5)
+HHEA-DQN 93.33 100 76.67 46.67 40 83.33 93.33 73.33 5.56(5)
+RPBILDE 43.33 6.67 10 96.67 96.667 93.33 0 6.67 6.13(6)
+HHEA-PPO-DSC 10 0 53.33 56.67 76.67 0 96.67 100 6.69(7)
+NSGA-II 20 13.33 26.67 13.33 93.33 66.67 0 0 7.81(8)
+MSCEA 0 90 0 3.33 46.67 36.67 0 0 9.25(9)
+IMOMRFO 0 0 0 53.33 0 0 0 93.33 10.00(10)
+MOEA/D-DQN 0 0 0 0 0 0 93.33 0 10.88(11)
+DSC-MOSOS 0 0 0 0 0 0 0 0 11.56(13)
+MO-Ring-PSO-SCD 0 0 0 0 0 0 0 0 11.56(13)
+MOCS 0 0 0 0 0 0 0 0 11.56(13)
+*Thebestresultisshowninbold,andFARindicatestheFriedman ’saverageranking.
+Table 9
+Averagecalculation durations(s)ofallcompeting algorithms.
+Algorithm 10-bar 25-bar 37-bar 60-bar 72-bar 120-bar 200-bar 942-bar FAR
+HHEA-PPO 14.47 8.62 29.12 63.63 63.05 64.38 96.16 439.28 3.13(2)
+SHAMODE-WO 50.56 38.73 62.37 116.78 134.02 177.30 107.08 434.10 5.75(6)
+CAEAD 6.58 11.61 23.55 50.09 58.57 40.60 162.88   3.63(3)
+IBMSMA 5.54 10.36 21.16 54.34 54.43 72.79 102.01 365.82 2.13(1)
+HHEA-DQN 13.12 10.64 34.75 60.04 69.15 67.10 131.68 717.92 4.25(4)
+RPBILDE 317.77 348.23 347.27 235.45 339.65 446.15   2131.19 8.63(8)
+HHEA-PPO-DSC 59.16   80.88 123.86 134.73   219.30 743.10 8.25(7)
+NSGA-II 10.15 13.55 33.73 60.13 47.35 65.43     5.38(5)
+MSCEA   21.47   91.74 76.36 135.07     8.75(9)
+IMOMRFO       50.45       658.39 9.38(10)
+MOEA/D-DQN             615.69   11.06(11)
+DSC-MOSOS                 11.56(13)
+MO-Ring-PSO-SCD                 11.56(13)
+MOCS                 11.56(13)
+*Thebestresultisshowninbold,andFARindicatestheFriedman ’saverageranking.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+16 Fig.9.Successrateandaveragecomputation durationofallcompeting algorithms.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+17 SHAMODE-WO, respectively. FortheSRmetric,HHEA-PPO achieveda
+successratecloseto100%foralleighttrussproblems. Compared to
+SHAMODE-WO, IBMSMA, andHHEA-DQN, HHEA-PPO ’sSRimproved
+by9.07%,60.27%,and45.67%,respectively. FortheACDsmetric,
+despitetheinclusionoftheonlinelearningprocess,HHEA-PPO achieved
+theshortestACDsonthe25-barand200-barproblems, withanoverall
+performance secondonlytoIBMSMA.FortheAFEsmetric,HHEA-PPO
+showedthelowestAFEsonthe25-bar,10-bar,and120-barproblems.
+Inaddition,duetotheinfluenceofdeepneuralnetworktraining,HHEA-
+PPOismoresuitableforlarge-scale multi-objective trussproblems. On
+theonehand,insmall-scale trussproblems, PPOmaylearnstrategies
+tooearlyandeasilyfallintolocaloptima.Ontheotherhand,thelong
+trainingtimeofHHEA-PPO leadstolowerefficiencyinsmall-scale cases.
+Although HHEA-PPO performs wellonmosttrussoptimization
+problems, therearesomeweaknesses. First,HHEA-PPO incorporates an
+onlinelearningprocess,whichincreasesthecomputational durationof
+thealgorithm tosomeextent,resultinginpotentially longercomputa-
+tiontimesforsmall-scale problems. Second,HHEA-PPO maynotbe
+suitableforreal-timesystemsbecausethealgorithm requirestrainingin
+theearlystagesofiteration,resultinginlongerexecution times(Yin&
+Xiang,2024).Finally,becauseHHEA-PPO incorporates adeeprein-
+forcement learningalgorithm, itincreasesthesetupparameters ofthe
+algorithm, requiring repeatedadjustments toachieveoptimalperfor-
+mance.Thisincreasesthecomplexity ofapplyingthealgorithm.
+Tofurtherimprovetheperformance andapplicability ofHHEA-PPO,
+futureresearchwillfocusonthefollowing areas:(1)Exploreandinte-
+gratemoreadvanced deepreinforcement learningalgorithms, suchas
+deepdeterministic policygradient(Lillicrapetal.,2019)andtwin
+delayeddeepdeterministic policygradient(Fujimotoetal.,2018),to
+improvethelearningefficiency ofthealgorithm. (2)Integratemore
+LLHstoprovidethealgorithm withmoreexploratory andexploitative
+tendencies, andadapttomorediversesearchspacecharacteristics. (3)
+Designthehyperparameters oftheevolutionary algorithm aspartofthe
+actionspace,therebyimproving theadaptiveabilityofthealgorithm.
+(4)Developmethodsforofflinetrainingandonlineapplication by
+pre-collecting samplestotrainHLS,thusreducingexecution timein
+real-timesystems.(5)ApplyHHEA-PPO tomorereal-world problems,
+suchastopologyandshapevariableoptimization (Anosrietal.,2022),
+truck-multi dronedeliverysystem(Yılmazetal.,2024),andeconomic
+dispatchofcombined heatandpower(Ozkaya,Duman,etal.,2024),to
+verifyitsgenerality andeffectiveness.
+CRediT authorship contribution statement
+Shihong Yin:Investigation, Methodology, Software, Writing –
+originaldraft. Zhengrong Xiang:Conceptualization, Supervision,
+Validation, Writing –review &editing.Declaration ofcompeting interest
+Theauthorsdeclarethattheyhavenoknowncompeting financial
+interestsorpersonalrelationships thatcouldhaveappearedtoinfluence
+theworkreportedinthispaper.
+Data availability
+Datawillbemadeavailableonrequest.
+Acknowledgments
+Thisworkwassupported bytheNationalNaturalScienceFoundation
+ofChinaunderGrant62373191.
+References
+Ahmed,M.,&Babu,G.R.M.(2024).Hyper-heuristic multi-objective onlineoptimization
+forcybersecurityinbigdata.International JournalofSystemAssuranceEngineering
+andManagement, 15(1),314–323.https://doi.org/10.1007/s13198-022-01727-w
+Almeida,C.P.,Gonçalves, R.A.,Venske,S.,Lüders,R.,&Delgado,M.(2020).Hyper-
+heuristics usingmulti-armed banditmodelsformulti-objective optimization. Applied
+SoftComputing, 95,Article106520.https://doi.org/10.1016/j.asoc.2020.106520
+Anosri,S.,Panagant, N.,Bureerat,S.,&Pholdee,N.(2022).Successhistorybased
+adaptivemulti-objective differential evolution variantswithanintervalschemefor
+solvingsimultaneous topology,shapeandsizingtrussreliability optimisation.
+Knowledge-Based Systems,253,Article109533.https://doi.org/10.1016/j.
+knosys.2022.109533
+Azizi,M.,Aickelin,U.,Khorshidi, H.A.,&Shishehgarkhaneh, M.B.(2022).Shapeand
+sizeoptimization oftrussstructures byChaosgameoptimization considering
+frequency constraints. JournalofAdvancedResearch,41,89–100.https://doi.org/
+10.1016/j.jare.2022.01.002
+Cao,Z.,Lin,C.,&Zhou,M.(2021).Aknowledge-based cuckoosearchalgorithm to
+scheduleaflexiblejobshopwithsequencing flexibility. IEEETransactions on
+Automation ScienceandEngineering, 18(1),56–69.https://doi.org/10.1109/
+TASE.2019.2945717
+Carvalho, ˘E.C.R.,Carvalho, J.P.G.,Bernardino, H.S.,Lemonge, A.C.C.,Hallak,P.H.,
+&Vargas,D.E.C.(2024).Solvingmulti-objective trussstructural optimization
+problemsconsidering naturalfrequencies ofvibrationandautomatic member
+grouping.Evolutionary Intelligence, 17(2),653–678.https://doi.org/10.1007/
+s12065-022-00804-0
+Carvalho, J.P.G.,Carvalho, ˘E.C.R.,Vargas,D.E.C.,Hallak,P.H.,Lima,B.S.L.P.,&
+Lemonge, A.C.C.(2021).Multi-objective optimumdesignoftrussstructures using
+differential evolution algorithms. Computers &Structures, 252,Article106544.
+https://doi.org/10.1016/j.compstruc.2021.106544
+Carvalho, J.P.G.,Vargas,D.E.C.,Jacob,B.P.,Lima,B.S.L.P.,Hallak,P.H.,&
+Lemonge, A.C.C.(2024).Multi-objective structural optimization fortheautomatic
+membergroupingoftrussstructures usingevolutionary algorithms. Computers &
+Structures, 292,Article107230.https://doi.org/10.1016/j.compstruc.2023.107230
+David,P.,Mare ¯s,T.,&Chakraborti, N.(2023).Evolutionary multi-objective optimization
+oftrusstopologyforadditively manufactured components. Materialsand
+Manufacturing Processes,38(15),1922 –1931.https://doi.org/10.1080/
+10426914.2023.2196325
+Deb,K.(2011).Multi-objective optimisation usingevolutionary algorithms: An
+introduction. InMulti-objective Evolutionary Optimisation forProductDesignand
+Manufacturing (pp.3–34).London:Springer.https://doi.org/10.1007/978-0-85729-
+652-8_1.Table 10
+Averagenumberoffitnessevaluations ofallcompeting algorithms.
+Algorithm 10-bar 25-bar 37-bar 60-bar 72-bar 120-bar 200-bar 942-bar FAR
+HHEA-PPO 18756.26 8902.64 23651.33 34942.99 32010.15 21042.14 22129.67 19720.55 3.00(2)
+SHAMODE-WO 15594.10 11400.44 16006.39 26574.58 31727.46 23039.99 11931.77 9808.49 1.88(1)
+CAEAD 11749.39 12784.46 23151.44 32209.03 35009.80 13964.65 40118.53   4.13(3)
+IBMSMA 15757.26 14692.84 24529.45 36922.69 33271.42 26689.49 25184.20 16569.39 4.25(4)
+HHEA-DQN 20984.51 10784.05 30801.61 34067.03 36377.71 22481.85 30244.05 32352.71 4.50(5)
+RPBILDE 37697.74 30349.08 43607.38 32474.65 37001.76 30319.02   48451.12 7.13(6)
+HHEA-PPO-DSC 37493.04   35930.07 40264.68 41892.52   33247.59 23765.45 7.63(8)
+NSGA-II 38819.36 22627.02 43747.37 43723.28 30897.80 25296.07     7.50(7)
+MSCEA   20229.34   48852.49 41487.13 42732.69     9.63(9)
+IMOMRFO       33535.60       26683.06 9.75(10)
+MOEA/D-DQN             35678.96   10.94(11)
+DSC-MOSOS                 11.56(13)
+MO-Ring-PSO-SCD                 11.56(13)
+MOCS                 11.56(13)
+*Thebestresultisshowninbold,andFARindicatestheFriedman ’saverageranking.S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+18 Deb,K.,Pratap,A.,Agarwal,S.,&Meyarivan, T.(2002).Afastandelitistmultiobjective
+geneticalgorithm: NSGA-II.IEEETransactions onEvolutionary Computation, 6(2),
+182–197.https://doi.org/10.1109/4235.996017
+Deb,K.,Sindhya,K.,&Okabe,T.(2007).Self-adaptive simulated binarycrossoverfor
+real-parameter optimization. Proceedings ofthe9thAnnualConference onGeneticand
+Evolutionary Computation ,1187 –1194.https://doi.org/10.1145/1276958.1277190.
+Degertekin, S.O.(2012).Improved harmonysearchalgorithms forsizingoptimization of
+trussstructures. Computers &Structures,92–93,229–241.https://doi.org/10.1016/j.
+compstruc.2011.10.022
+Dokeroglu, T.,Kucukyilmaz, T.,&Talbi,E.-G.(2024).Hyper-heuristics: Asurveyand
+taxonomy. Computers &IndustrialEngineering, 187,Article109815.https://doi.org/
+10.1016/j.cie.2023.109815
+Duman,S.,Akbel,M.,&Kahraman, H.T.(2021).Development ofthemulti-objective
+adaptiveguideddifferential evolutionandoptimization oftheMO-ACOPF forwind/
+PV/tidalenergysources.AppliedSoftComputing, 112,Article107814.https://doi.
+org/10.1016/j.asoc.2021.107814
+Eid,H.F.,Garcia-Hernandez, L.,&Abraham, A.(2022).Spiralwatercyclealgorithm for
+solvingmulti-objective optimization andtrussoptimization problems.Engineering
+withComputers, 38(S2),963–973.https://doi.org/10.1007/s00366-020-01237-y
+Escalante, H.J.,Yao,Q.,Tu,W.-W.,Pillay,N.,Qu,R.,Yu,Y.,&Houlsby,N.(2021).
+Guesteditorial:Automated machinelearning.IEEETransactions onPatternAnalysis
+andMachineIntelligence, 43(9),2887 –2890.https://doi.org/10.1109/
+TPAMI.2021.3077106
+Fairclough, H.,&Gilbert,M.(2020).Layoutoptimization ofsimplified trussesusing
+mixedintegerlinearprogramming withruntimegeneration ofconstraints. Structural
+andMultidisciplinary Optimization, 61(5),1977 –1999.https://doi.org/10.1007/
+s00158-019-02449-7
+Fujimoto, S.,Hoof,H.,&Meger,D.(2018).Addressing functionapproximation errorin
+actor-critic methods.Proceedings ofthe35thInternational Conference onMachine
+Learning, 1587 –1596.https://proceedings.mlr.press/v80/fujimoto18a.html .
+Gandomi, A.H.,Talatahari, S.,Yang,X.-S.,&Deb,S.(2013).Designoptimization oftruss
+structures usingcuckoosearchalgorithm. TheStructuralDesignofTallandSpecial
+Buildings,22(17),1330 –1349.https://doi.org/10.1002/tal.1033
+Gholizadeh, S.,&Poorhoseini, H.(2016).Seismiclayoutoptimization ofsteelbraced
+framesbyanimproved dolphinecholocation algorithm. Structuraland
+Multidisciplinary Optimization, 54(4),1011 –1029.https://doi.org/10.1007/s00158-
+016-1461-y
+Gomes,H.M.(2011).Trussoptimization withdynamicconstraints usingaparticle
+swarmalgorithm. ExpertSystemswithApplications, 38(1),957–968.https://doi.org/
+10.1016/j.eswa.2010.07.086
+Gürgen,S.,Kahraman, H.T.,Aras,S.,&Altın, lI.(2022).Acomprehensive performance
+analysisofmeta-heuristic optimization techniques foreffectiveorganicrankinecycle
+design.AppliedThermalEngineering, 213,Article118687.https://doi.org/10.1016/j.
+applthermaleng.2022.118687
+Ho-Huu,V.,Duong-Gia, D.,Vo-Duy,T.,Le-Duc,T.,&Nguyen-Thoi, T.(2018).An
+efficientcombination ofmulti-objective evolutionary optimization andreliability
+analysisforreliability-based designoptimization oftrussstructures. ExpertSystems
+withApplications, 102,262–272.https://doi.org/10.1016/j.eswa.2018.02.040
+Ho-Huu,V.,Hartjes,S.,Visser,H.G.,&Curran,R.(2018).Animproved MOEA/D
+algorithm forbi-objective optimization problemswithcomplexParetofrontsandits
+application tostructural optimization. ExpertSystemswithApplications, 92,430–446.
+https://doi.org/10.1016/j.eswa.2017.09.051
+Ho-Huu,V.,Vo-Duy,T.,Luu-Van,T.,Le-Anh,L.,&Nguyen-Thoi, T.(2016).Optimal
+designoftrussstructures withfrequency constraints usingimproved differential
+evolution algorithm basedonanadaptivemutationscheme.Automation in
+Construction, 68,81–94.https://doi.org/10.1016/j.autcon.2016.05.004
+Jawad,F.K.J.,Ozturk,C.,Dansheng, W.,Mahmood, M.,Al-Azzawi, O.,&Al-Jemely, A.
+(2021).Sizingandlayoutoptimization oftrussstructures withartificialbeecolony
+algorithm. Structures, 30,546–559.https://doi.org/10.1016/j.istruc.2021.01.016
+Jiang,F.,Wang,L.,&Bai,L.(2021).Animproved whalealgorithm anditsapplication in
+trussoptimization. JournalofBionicEngineering, 18(3),721–732.https://doi.org/
+10.1007/s42235-021-0041-z
+Kahraman, H.T.,Akbel,M.,&Duman,S.(2022).Optimization ofoptimalpowerflow
+problemusingmulti-objective mantarayforagingoptimizer. AppliedSoftComputing,
+116,Article108334.https://doi.org/10.1016/j.asoc.2021.108334
+Kahraman, H.T.,Akbel,M.,Duman,S.,Kati,M.,&Sayan,H.H.(2022).Unifiedspace
+approach-based dynamicswitchedcrowding(DSC):Anewmethodfordesigning
+Pareto-based multi/many-objective algorithms. SwarmandEvolutionary Computation,
+75,Article101196.https://doi.org/10.1016/j.swevo.2022.101196
+Kaveh,A.,Hamedani, K.B.,&Kamalinejad, M.(2022).Improved slimemouldalgorithm
+withelitiststrategyanditsapplication tostructural optimization withnatural
+frequency constraints. Computers &Structures, 264,Article106760.https://doi.org/
+10.1016/j.compstruc.2022.106760
+Kaveh,A.,&Khayatazad, M.(2013).Rayoptimization forsizeandshapeoptimization of
+trussstructures. Computers &Structures, 117,82–94.https://doi.org/10.1016/j.
+compstruc.2012.12.010
+Kennedy,J.,&Eberhart,R.(1995).Particleswarmoptimization. Proceedings ofICNN ’95
+-International Conference onNeuralNetworks,4,1942 –1948.https://doi.org/
+10.1109/ICNN.1995.488968.
+Khodadadi, N.,&Mirjalili,S.(2022).Trussoptimization withnaturalfrequency
+constraints usinggeneralized normaldistribution optimization. AppliedIntelligence,
+52(9),10384 –10397.https://doi.org/10.1007/s10489-021-03051-5
+Kingma,D.P.,&Ba,J.(2017).Adam:Amethodforstochasticoptimization (arXiv:
+1412.6980). arXiv.https://doi.org/10.48550/arXiv.1412.6980.
+Kumar,S.,Jangir,P.,Tejani,G.G.,&Premkumar, M.(2022).MOTEO:Anovelphysics-
+basedmultiobjective thermalexchangeoptimization algorithm todesigntrussstructures. Knowledge-Based Systems,242,Article108422.https://doi.org/10.1016/
+j.knosys.2022.108422
+Kumar,S.,Panagant, N.,Tejani,G.G.,Pholdee,N.,Bureerat,S.,Mashru,N.,&Patel,P.
+(2023).Atwo-archive multi-objective multi-verse optimizer fortrussdesign.
+Knowledge-Based Systems,270,Article110529.https://doi.org/10.1016/j.
+knosys.2023.110529
+Kumar,S.,Tejani,G.G.,&Mirjalili,S.(2019).Modifiedsymbiotic organisms searchfor
+structural optimization. Engineering withComputers, 35(4),1269 –1296.https://doi.
+org/10.1007/s00366-018-0662-y
+Kumar,S.,Tejani,G.G.,Pholdee,N.,&Bureerat,S.(2021).Multi-objective modified
+heattransfersearchfortrussoptimization. Engineering withComputers, 37(4),
+3439 –3454.https://doi.org/10.1007/s00366-020-01010-1
+Kumar,S.,Tejani,G.G.,Pholdee,N.,Bureerat,S.,&Mehta,P.(2021).Hybridheat
+transfersearchandpassingvehiclesearchoptimizer formulti-objective structural
+optimization. Knowledge-Based Systems,212,Article106556.https://doi.org/
+10.1016/j.knosys.2020.106556
+Kupwiwat, C.,Hayashi,K.,&Ohsaki,M.(2024).Multi-objective optimization oftruss
+structureusingmulti-agent reinforcement learningandgraphrepresentation.
+Engineering Applications ofArtificialIntelligence, 129,Article107594.https://doi.org/
+10.1016/j.engappai.2023.107594
+Lamberti, L.,&Pappalettere, C.(2004).Improved sequential linearprogramming
+formulation forstructural weightminimization. ComputerMethodsinApplied
+MechanicsandEngineering, 193(33),3493 –3521.https://doi.org/10.1016/j.
+cma.2003.12.040
+Lemonge, A.C.C.,Carvalho, J.P.G.,Hallak,P.H.,Vargas,D.,&E.c..(2021).Multi-
+objectivetrussstructural optimization considering naturalfrequencies ofvibration
+andglobalstability.ExpertSystemswithApplications, 165,Article113777.https://
+doi.org/10.1016/j.eswa.2020.113777
+Li,C.,Li,S.,Shi,L.,Zhao,Y.,Zhang,S.,&Wang,S.(2024).Acompass-based hyper-
+heuristicformulti-objective optimization problems.SwarmandEvolutionary
+Computation, 87,Article101530.https://doi.org/10.1016/j.swevo.2024.101530
+Li,Z.,Shi,L.,Yue,C.,Shang,Z.,&Qu,B.(2019).Differential evolution basedon
+reinforcement learningwithfitnessrankingforsolvingmultimodal multiobjective
+problems.SwarmandEvolutionary Computation, 49,234–244.https://doi.org/
+10.1016/j.swevo.2019.06.010
+Liang,J.,Qiao,K.,Yue,C.,Yu,K.,Qu,B.,Xu,R.,Li,Z.,&Hu,Y.(2021).Aclustering-
+baseddifferential evolution algorithm forsolvingmultimodal multi-objective
+optimization problems.SwarmandEvolutionary Computation, 60,Article100788.
+https://doi.org/10.1016/j.swevo.2020.100788
+Lieu,Q.X.,Do,D.T.T.,&Lee,J.(2018).Anadaptivehybridevolutionary firefly
+algorithm forshapeandsizeoptimization oftrussstructures withfrequency
+constraints. Computers &Structures, 195,99–112.https://doi.org/10.1016/j.
+compstruc.2017.06.016
+Lillicrap,T.P.,Hunt,J.J.,Pritzel,A.,Heess,N.,Erez,T.,Tassa,Y.,Silver,D.,&Wierstra,
+D.(2019).Continuous controlwithdeepreinforcement learning(arXiv:1509.02971).
+arXiv.https://doi.org/10.48550/arXiv.1509.02971 .
+Lin,Q.,Lin,W.,Zhu,Z.,Gong,M.,Li,J.,&Coello,C.A.C.(2021).Multimodal
+multiobjective evolutionary optimization withdualclustering indecisionand
+objectivespaces.IEEETransactions onEvolutionary Computation, 25(1),130–144.
+https://doi.org/10.1109/TEVC.2020.3008822
+Liu,J.,&Xia,Y.(2022).Ahybridintelligent geneticalgorithm fortrussoptimization
+basedondeepneutralnetwork.SwarmandEvolutionary Computation, 73,Article
+101120.https://doi.org/10.1016/j.swevo.2022.101120
+Liu,Y.,Ishibuchi, H.,Yen,G.G.,Nojima,Y.,&Masuyama, N.(2019).Handling
+imbalance betweenconvergence anddiversityinthedecisionspaceinevolutionary
+multi-modal multi-objective optimization. IEEETransactions onEvolutionary
+Computation, 1–1.https://doi.org/10.1109/TEVC.2019.2938557
+Luo,Q.,Yin,S.,Zhou,G.,Meng,W.,Zhao,Y.,&Zhou,Y.(2023).Multi-objective
+equilibrium optimizer slimemouldalgorithm anditsapplication insolving
+engineering problems.StructuralandMultidisciplinary Optimization, 66(5),114.
+https://doi.org/10.1007/s00158-023-03568-y
+Nguyen-Van, S.,Nguyen,K.T.,Luong,V.H.,Lee,S.,&Lieu,Q.X.(2021).Anovelhybrid
+differential evolution andsymbiotic organisms searchalgorithm forsizeandshape
+optimization oftrussstructures undermultiplefrequency constraints. ExpertSystems
+withApplications, 184,Article115534.https://doi.org/10.1016/j.eswa.2021.115534
+Ozkaya,B.,Duman,S.,Kahraman, H.T.,&Guvenc,U.(2024).Optimalsolutionofthe
+combined heatandpowereconomic dispatchproblembyadaptivefitness-distance
+balancebasedartificialrabbitsoptimization algorithm. ExpertSystemswith
+Applications, 238,Article122272.https://doi.org/10.1016/j.eswa.2023.122272
+Ozkaya,B.,Kahraman, H.T.,Duman,S.,Guvenc,U.,&Akbel,M.(2024).Combined heat
+andpowereconomic emissiondispatchusingdynamicswitchedcrowdingbased
+multi-objective symbiotic organismsearchalgorithm. AppliedSoftComputing, 151,
+Article111106.https://doi.org/10.1016/j.asoc.2023.111106
+Oztürk,H.T.,&Kahraman, H.T.(2023).Meta-heuristic searchalgorithms intruss
+optimization: Researchonstabilityandcomplexity analyses.AppliedSoftComputing,
+145,Article110573.https://doi.org/10.1016/j.asoc.2023.110573
+Panagant, N.,&Bureerat,S.(2018).Trusstopology,shapeandsizingoptimization by
+fullystresseddesignbasedonhybridgreywolfoptimization andadaptive
+differential evolution. Engineering Optimization, 50(10),1645 –1661.https://doi.org/
+10.1080/0305215X.2017.1417400
+Panagant, N.,Bureerat,S.,&Tai,K.(2019).Anovelself-adaptive hybridmulti-objective
+meta-heuristic forreliability designoftrusseswithsimultaneous topology,shapeand
+sizingoptimisation designvariables.StructuralandMultidisciplinary Optimization, 60
+(5),1937 –1955.https://doi.org/10.1007/s00158-019-02302-x
+Panagant, N.,Pholdee,N.,Bureerat,S.,Yildiz,A.R.,&Mirjalili,S.(2021).Acomparative
+studyofrecentmulti-objective metaheuristics forsolvingconstrained trussS.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+19 optimisation problems.ArchivesofComputational MethodsinEngineering, 28(5),
+4031 –4047.https://doi.org/10.1007/s11831-021-09531-8
+Pham,H.-A.,&Tran,T.-D.(2022).OptimaltrusssizingbymodifiedRaoalgorithm
+combined withfeasibleboundary searchmethod.ExpertSystemswithApplications,
+191,Article116337.https://doi.org/10.1016/j.eswa.2021.116337
+Pierezan,J.,dosSantosCoelho,L.,CoccoMariani,V.,deVasconcelos, H.,Segundo,E.,&
+Prayogo,D.(2021).Chaoticcoyotealgorithm appliedtotrussoptimization
+problems.Computers &Structures, 242,Article106353.https://doi.org/10.1016/j.
+compstruc.2020.106353
+Poulsen,P.N.,Olesen,J.F.,&Baandrup, M.(2020).Trussoptimization applyingfinite
+elementlimitanalysisincluding globalandlocalstability.Structuraland
+Multidisciplinary Optimization, 62(1),41–54.https://doi.org/10.1007/s00158-019-
+02468-4
+Renkavieski, C.,&Parpinelli, R.S.(2021).Meta-heuristic algorithms totruss
+optimization: Literature mappingandapplication. ExpertSystemswithApplications,
+182,Article115197.https://doi.org/10.1016/j.eswa.2021.115197
+Schulman, J.,Levine,S.,Abbeel,P.,Jordan,M.,&Moritz,P.(2015).Trustregionpolicy
+optimization. Proceedings ofthe32ndInternational Conference onMachineLearning,
+37,1889 –1897.https://proceedings.mlr.press/v37/schulman15.html.
+Schulman, J.,Wolski,F.,Dhariwal, P.,Radford,A.,&Klimov,O.(2017).Proximalpolicy
+optimization algorithms (arXiv:1707.06347). arXiv.https://doi.org/10.48550/
+arXiv.1707.06347.
+Sonmez,M.(2011).Artificialbeecolonyalgorithm foroptimization oftrussstructures.
+AppliedSoftComputing, 11(2),2406 –2418.https://doi.org/10.1016/j.
+asoc.2010.09.003
+Storn,R.,&Price,K.(1997).Differential evolution –Asimpleandefficientheuristicfor
+globaloptimization overcontinuous spaces.JournalofGlobalOptimization, 11,
+341–359.
+Sun,L.,&Li,K.(2020).AdaptiveoperatorselectionbasedondynamicThompson
+samplingforMOEA/D. InT.Back,M.Preuss,A.Deutz,H.Wang,C.Doerr,
+M.Emmerich, &H.Trautmann (Eds.),ParallelProblemSolvingfromNature –PPSN
+XVI(Vol.12270,pp.271–284).SpringerInternational Publishing. https://doi.org/
+10.1007/978-3-030-58115-2_19 .
+Techasen, T.,Wansasueb, K.,Panagant, N.,Pholdee,N.,&Bureerat,S.(2019).
+Simultaneous topology,shape,andsizeoptimization oftrusses,takingaccountof
+uncertainties usingmulti-objective evolutionary algorithms. Engineering with
+Computers, 35(2),721–740.https://doi.org/10.1007/s00366-018-0629-z
+Tejani,G.G.,Kumar,S.,&Gandomi, A.H.(2021).Multi-objective heattransfersearch
+algorithm fortrussoptimization. Engineering withComputers, 37(1),641–662.
+https://doi.org/10.1007/s00366-019-00846-6
+Tejani,G.G.,Pholdee,N.,Bureerat,S.,Prayogo,D.,&Gandomi, A.H.(2019).Structural
+optimization usingmulti-objective modifiedadaptivesymbiotic organisms search.
+ExpertSystemswithApplications, 125,425–441.https://doi.org/10.1016/j.
+eswa.2019.01.068
+Tejani,G.G.,Savsani,V.J.,Bureerat,S.,Patel,V.K.,&Savsani,P.(2019).Topology
+optimization oftrusssubjected tostaticanddynamicconstraints byintegrating
+simulated annealing intopassingvehiclesearchalgorithms. Engineering with
+Computers, 35(2),499–517.https://doi.org/10.1007/s00366-018-0612-8
+Tejani,G.G.,Savsani,V.J.,&Patel,V.K.(2016).Adaptivesymbiotic organisms search
+(SOS)algorithm forstructural designoptimization. JournalofComputational Design
+andEngineering, 3(3),226–249.https://doi.org/10.1016/j.jcde.2016.02.003
+Tian,Y.,Cheng,R.,Zhang,X.,&Jin,Y.(2017).PlatEMO: AMATLABplatformfor
+evolutionary multi-objective optimization [Educational Forum].IEEEComputational
+Intelligence Magazine,12(4),73–87.https://doi.org/10.1109/MCI.2017.2742868
+Tian,Y.,Li,X.,Ma,H.,Zhang,X.,Tan,K.C.,&Jin,Y.(2023).Deepreinforcement
+learningbasedadaptiveoperatorselectionforevolutionary multi-objective
+optimization. IEEETransactions onEmergingTopicsinComputational Intelligence, 7(4),
+1051 –1064.https://doi.org/10.1109/TETCI.2022.3146882
+Venske,S.M.,Almeida,C.P.,Lüders,R.,&Delgado,M.R.(2022).Selectionhyper-
+heuristics forthemultiandmany-objective quadratic assignment problem.
+Computers &Operations Research,148,Article105961.https://doi.org/10.1016/j.
+cor.2022.105961
+Vo,N.,Tang,H.,&Lee,J.(2024).Amulti-objective greywolf-cuckoo searchalgorithm
+appliedtospatialtrussdesignoptimization. AppliedSoftComputing, 155,Article
+111435.https://doi.org/10.1016/j.asoc.2024.111435
+While,L.,Hingston, P.,Barone,L.,&Huband,S.(2006).Afasteralgorithm for
+calculating hypervolume. IEEETransactions onEvolutionary Computation, 10(1),
+29–38.https://doi.org/10.1109/TEVC.2005.851275Wolpert,D.H.,&Macready, W.G.(1997).Nofreelunchtheoremsforoptimization. IEEE
+Transactions onEvolutionary Computation, 1(1),67–82.https://doi.org/10.1109/
+4235.585893
+Wu,S.,Heidari,A.A.,Zhang,S.,Kuang,F.,&Chen,H.(2023).Gaussianbare-bone slime
+mouldalgorithm: Performance optimization andcasestudiesontrussstructures.
+ArtificialIntelligence Review,56(9),9051 –9087.https://doi.org/10.1007/s10462-
+022-10370-7
+Xu,N.,Shi,Z.,Yin,S.,&Xiang,Z.(2024).Ahyper-heuristic withdeepQ-network forthe
+multi-objective unmanned surfacevehiclesscheduling problem.Neurocomputing,
+596,Article127943.https://doi.org/10.1016/j.neucom.2024.127943
+Yang,X.-S.,&Deb,S.(2013).Multiobjective cuckoosearchfordesignoptimization.
+Computers &Operations Research,40(6),1616 –1624.https://doi.org/10.1016/j.
+cor.2011.09.026
+Yao,X.,Liu,Y.,&Lin,G.(1999).Evolutionary programming madefaster.IEEE
+Transactions onEvolutionary Computation, 3(2),82–102.https://doi.org/10.1109/
+4235.771163
+Yi,W.,Qu,R.,Jiao,L.,&Niu,B.(2023).Automated designofmetaheuristics using
+reinforcement learningwithinanovelgeneralsearchframework. IEEETransactions
+onEvolutionary Computation, 27(4),1072 –1084.https://doi.org/10.1109/
+TEVC.2022.3197298
+Yin,S.,Luo,Q.,&Zhou,Y.(2023).IBMSMA: Anindicator-based multi-swarm slime
+mouldalgorithm formulti-objective trussoptimization problems.JournalofBionic
+Engineering, 20(3),1333 –1360.https://doi.org/10.1007/s42235-022-00307-9
+Yin,S.,&Xiang,Z.(2024).AdaptiveoperatorselectionwithduelingdeepQ-network for
+evolutionary multi-objective optimization. Neurocomputing, 581,Article127491.
+https://doi.org/10.1016/j.neucom.2024.127491
+Yılmaz,C.,Cengiz,E.,&Kahraman, H.T.(2024).Anewevolutionary optimization
+algorithm withhybridguidancemechanism fortruck-multi dronedeliverysystem.
+ExpertSystemswithApplications, 245,Article123115.https://doi.org/10.1016/j.
+eswa.2023.123115
+Yue,C.,Qu,B.,&Liang,J.(2018).Amultiobjective particleswarmoptimizer usingring
+topologyforsolvingmultimodal multiobjective problems.IEEETransactions on
+Evolutionary Computation, 22(5),805–817.https://doi.org/10.1109/
+TEVC.2017.2754271
+Yue,C.,Suganthan, P.N.,Liang,J.,Qu,B.,Yu,K.,Zhu,Y.,&Yan,L.(2021).Differential
+evolution usingimproved crowdingdistanceformultimodal multiobjective
+optimization. SwarmandEvolutionary Computation, 62,Article100849.https://doi.
+org/10.1016/j.swevo.2021.100849
+Zhang,Y.,Tian,Y.,Jiang,H.,Zhang,X.,&Jin,Y.(2023).Designandanalysisofhelper-
+problem-assisted evolutionary algorithm forconstrained multiobjective
+optimization. Information Sciences,648,Article119547.https://doi.org/10.1016/j.
+ins.2023.119547
+Zhang,Z.,Tang,Q.,Chica,M.,&Li,Z.(2023).Reinforcement learning-based
+multiobjective evolutionary algorithm formixed-model multimanned assemblyline
+balancing underuncertain demand.IEEETransactions onCybernetics, 1–14.https://
+doi.org/10.1109/TCYB.2022.3229666
+Zhang,Z.-Q.,Wu,F.-C.,Qian,B.,Hu,R.,Wang,L.,&Jin,H.-P.(2023).AQ-learning-
+basedhyper-heuristic evolutionary algorithm forthedistributed flexiblejob-shop
+scheduling problemwithcranetransportation. ExpertSystemswithApplications, 234,
+Article121050.https://doi.org/10.1016/j.eswa.2023.121050
+Zhao,F.,Liu,Y.,Zhu,N.,Xu,T.,&Jonrinaldi. (2023).Aselectionhyper-heuristic
+algorithm withQ-learning mechanism. AppliedSoftComputing, 147,Article110815.
+https://doi.org/10.1016/j.asoc.2023.110815
+Zhao,W.,Zhang,Z.,Mirjalili,S.,Wang,L.,Khodadadi, N.,&Mirjalili,S.M.(2022).An
+effectivemulti-objective artificialhummingbird algorithm withdynamic
+elimination-based crowdingdistanceforsolvingengineering designproblems.
+ComputerMethodsinAppliedMechanicsandEngineering, 398,Article115223.https://
+doi.org/10.1016/j.cma.2022.115223
+Zhong,C.,Li,G.,Meng,Z.,Li,H.,&He,W.(2023).Multi-objective SHADEwithmanta
+rayforagingoptimizer forstructural designproblems.AppliedSoftComputing, 134,
+Article110016.https://doi.org/10.1016/j.asoc.2023.110016
+Zou,J.,Sun,R.,Yang,S.,&Zheng,J.(2021).Adual-population algorithm basedon
+alternative evolution anddegeneration forsolvingconstrained multi-objective
+optimization problems.Information Sciences,579,89–102.https://doi.org/10.1016/
+j.ins.2021.07.078S.YinandZ.Xiang Expert  Systems  With Applications  256 (2024)  124929  
+20 
