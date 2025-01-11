@@ -1,0 +1,12 @@
+Analysis Parameters:
+Step Size: 20
+Max Iterations: 1000
+Population Size: 50
+Dimension: 10
+
+Data Summary:
+Total Exploration Actions: 26488
+Total Exploitation Actions: 23512
+Total Actions: 50000
+Exploration Ratio: 0.5298
+Exploitation Ratio: 0.4702

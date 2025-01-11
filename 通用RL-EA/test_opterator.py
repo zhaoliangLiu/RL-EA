@@ -1,5 +1,5 @@
-# from operators import operators
-from LLH10 import operators
+from operators import operators
+# from LLH10 import operators
 from fitness_function.cec2017.functions import all_functions
 # from simple_function.simple_functions import all_functions
 import numpy as np
@@ -9,14 +9,14 @@ from other_ea.standard_pso import standard_pso
 
 # 配置参数
 operator_id = 8  # 选择要测试的算子
-function_id = 5  # 选择测试函数
+function_id = 9  # 选择测试函数
 fitness_function = all_functions[function_id]
 true_best_fitness = 0
 operator = operators[operator_id]
 
 # 种群参数设置
-pop_size = 50
-dim = 30
+pop_size = 30
+dim = 10
 max_iter = 1000
 arange = (-100, 100)
 

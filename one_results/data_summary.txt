@@ -5,8 +5,8 @@ Population Size: 50
 Dimension: 10
 
 Data Summary:
-Total Exploration Actions: 1421
-Total Exploitation Actions: 579
+Total Exploration Actions: 77
+Total Exploitation Actions: 1923
 Total Actions: 2000
-Exploration Ratio: 0.7105
-Exploitation Ratio: 0.2895
+Exploration Ratio: 0.0385
+Exploitation Ratio: 0.9615

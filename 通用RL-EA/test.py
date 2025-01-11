@@ -13,6 +13,7 @@ from other_ea.SHDE import shade
 from other_ea.RDE import rde
 from dqn_agent import DQNAgent
 from operators import operators
+# from LLH10 import operators
 import random
 import os
 import csv
@@ -28,11 +29,11 @@ def test_dqn_strategy(population, num_particles, dim, max_iter, fitness_function
     agent1 = DQNAgent(state_size=6, action_size=2)
     agent2 = DQNAgent(state_size=8, action_size=len(operator_keys))
     
-    if not os.path.exists('models/agent1.pth') or not os.path.exists('models/agent2.pth'):
+    if not os.path.exists('models/agent1_test.pth') or not os.path.exists('models/agent2_test.pth'):
         raise FileNotFoundError("请先训练模型，确保 'models/agent1.pth' 和 'models/agent2.pth' 文件存在。")
     
-    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1.pth'))
-    agent2.qnetwork_local.load_state_dict(torch.load('models/agent2.pth'))
+    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1_test.pth'))
+    agent2.qnetwork_local.load_state_dict(torch.load('models/agent2_test.pth'))
     # 参数设置
     pop_size = population.shape[0]                # 种群大小
     dimension = population.shape[1]               # 维度
@@ -104,8 +105,9 @@ def test_dqn_strategy(population, num_particles, dim, max_iter, fitness_function
 
 def test():
   
-    fitness_function_id = 1
-    fitness_num = len(all_functions) - 1
+    fitness_function_id = 5
+    # fitness_num = len(all_functions) - 1
+    fitness_num = 1
     pop_size =  50
     dim = 10
     max_iter = 1000
