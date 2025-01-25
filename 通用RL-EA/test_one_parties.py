@@ -8,6 +8,7 @@ from other_ea.jade_de import jade_de
 from utils import compute_state
 from dqn_agent import DQNAgent
 from operators import operators
+# from LLH10 import operators
 import random
 import os
 import csv
@@ -28,8 +29,8 @@ def test_dqn_strategy(population, num_particles, dim, max_iter, fitness_function
     if not os.path.exists('models/agent1.pth') or not os.path.exists('models/agent2.pth'):
         raise FileNotFoundError("请先训练模型，确保 'models/agent1.pth' 和 'models/agent2.pth' 文件存在。")
     
-    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1.pth'))
-    agent2.qnetwork_local.load_state_dict(torch.load('models/agent2.pth'))
+    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1_test.pth'))
+    agent2.qnetwork_local.load_state_dict(torch.load('models/agent2_test.pth'))
     # 参数设置
     pop_size = population.shape[0]                # 种群大小
     dimension = population.shape[1]               # 维度
@@ -101,7 +102,7 @@ def test_dqn_strategy(population, num_particles, dim, max_iter, fitness_function
 
 def test():
   
-    fitness_function_id = 1
+    fitness_function_id = 14
     fitness_num = 1
     pop_size = 50
     dim = 10
@@ -200,10 +201,136 @@ def test2():
             f.write(f"Total Actions: {sum(action_zero) + sum(action_one)}\n")
             f.write(f"Exploration Ratio: {sum(action_zero)/(sum(action_zero) + sum(action_one)):.4f}\n")
             f.write(f"Exploitation Ratio: {sum(action_one)/(sum(action_zero) + sum(action_one)):.4f}\n")
-   
+def test3():
+    """
+    统计所有粒子每次迭代时的勘探和开发情况
+    """
+    fitness_function_id = 9
+    fitness_function = all_functions[fitness_function_id]
+    fitness_num = 1
+    pop_size = 50
+    dim = 30
+    max_iter = 1000
+    arange = (-100, 100) 
+    agent1_action = {'exploration': [], 'exploitation': []}
+    agent2_action = []
+    population = np.random.uniform(arange[0], arange[1], (pop_size, dim))
+
+    count = {f'o{i+1}': 0 for i in range(len(operators))}
+    # 将 operators 转换为字典形式
+    operators_dict = {f'o{i+1}': operators[i] for i in range(len(operators))}
+    operator_keys = list(operators_dict.keys())
+
+    agent1 = DQNAgent(state_size=6, action_size=2)
+    agent2 = DQNAgent(state_size=8, action_size=len(operator_keys))
+    
+    if not os.path.exists('models/agent1.pth') or not os.path.exists('models/agent2.pth'):
+        raise FileNotFoundError("请先训练模型，确保 'models/agent1.pth' 和 'models/agent2.pth' 文件存在。")
+    
+    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1.pth'))
+    agent2.qnetwork_local.load_state_dict(torch.load('models/agent2.pth'))
+    # 参数设置
+    pop_size = population.shape[0]                # 种群大小
+    dimension = population.shape[1]               # 维度
+
+ 
+    pre_population = np.copy(population)
+    velocities = np.random.uniform(arange[0], arange[1], (pop_size, dimension)) * 0.15
+    fitness_0 = fitness_function(population)
+    pBest = np.copy(population)
+    fitness_pBest = fitness_function(pBest)
+    gBest = pBest[np.argmin(fitness_pBest)]
+    fitness_gBest = fitness_function([gBest])[0]
+    fitness_history = [fitness_gBest]
+    
+    current_operator = np.random.choice(operator_keys, size=pop_size)
+    count_k = [0] * pop_size
+    
+    step = 20  # 添加步长参数
+    exploration_counts = []
+    exploitation_counts = []
+
+    # 在开始迭代前创建CSV文件并写入表头
+    with open('one_results/勘探开发.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Generation', 'Exploration Count', 'Exploitation Count', 'Total Count'])
+
+    for iter in range(max_iter):
+        # 计算状态和动作
+        state_features = compute_state(
+            pre_population, population, pBest, gBest, 
+            fitness_function, max_iter, iter, count_k
+        )
+        action1 = agent1.act_test(state_features, 0)
+        action_count = list(action1)
+        # exploration计入这次迭代，所有个体action1等于1的次数，exploitation计入action1等于0的次数
+
+        # 修改记录方式
+        exploration_count = action_count.count(1)
+        exploitation_count = action_count.count(0)
+        agent1_action['exploration'].append(exploration_count)
+        agent1_action['exploitation'].append(exploitation_count)
+
+        # 直接写入当前代的数据
+        with open('one_results/勘探开发.csv', 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([iter, exploration_count, exploitation_count, exploration_count + exploitation_count])
+
+        operator_indices = np.array([operator_keys.index(op) for op in current_operator])
+        state2_features = np.column_stack((action1, operator_indices, state_features))
+        action2 = agent2.act_test(state2_features, 0)
+        
+        # 应用选择的算子
+        new_population = []
+        new_velocities = []
+        for i in range(pop_size):
+            selected_operator_key = operator_keys[action2[i]] 
+            count[selected_operator_key] += 1
+            selected_operator = operators_dict[selected_operator_key]
+            new_individual, new_velocity = selected_operator(
+                i, population, pBest, gBest, 
+                fitness_function, iter, max_iter, velocities[i]
+            )
+            new_individual = np.clip(new_individual, -100, 100)
+            new_population.append(new_individual)
+            new_velocities.append(new_velocity)
+            
+        pre_population = np.copy(population)
+        population = np.array(new_population)
+        population = np.clip(population, arange[0], arange[1])
+        velocities = np.array(new_velocities)
+        velocities = np.clip(velocities, arange[0], arange[1]) * 0.15
+        
+        # 更新最优解
+        fitness_population = fitness_function(population)
+        update = fitness_population < fitness_pBest
+        pBest[update] = population[update]
+        fitness_pBest[update] = fitness_population[update]
+        count_k = [count_k[i] + 1 if update[i] else count_k[i] for i in range(pop_size)]
+        
+        if np.min(fitness_pBest) < fitness_gBest:
+            gBest = pBest[np.argmin(fitness_pBest)]
+            fitness_gBest = fitness_function([gBest])[0]
+            
+        fitness_history.append(fitness_gBest)
+        current_operator = np.array([operator_keys[a] for a in action2])
+    print(f"最优解:{gBest}, 最优解适应度:{fitness_gBest}")
+        
+    # 保持原有的绘图功能 
+    plt.plot(agent1_action['exploration'], label='exploration')
+    plt.legend() 
+    plt.title('Exploration Counts')
+    if not os.path.exists('勘探证明'):
+        os.makedirs('勘探证明')
+    plt.savefig("勘探证明/勘探开发粒子数.png")
+    plt.close()
+    return agent1_action
+
+
 
 if __name__ == "__main__":
 
     test2()
     # test()
+    test3()
      

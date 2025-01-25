@@ -7,8 +7,13 @@ import torch.optim as optim
 from fitness_function.cec2017.functions import all_functions
 from utils import compute_state
 from dqn_agent import DQNAgent
+<<<<<<< HEAD
 from LLH10 import operators
 # from operators import operators
+=======
+from operators import operators
+# from LLH10 import operators
+>>>>>>> 4b08f78d0ad876e93d5b3c2657236dd055db07b5
 import random
 import os
 
@@ -19,10 +24,18 @@ operator_keys = list(operators_dict.keys())
 # 参数设置
 pop_size = 50                # 种群大小
 dimension = 10               # 维度
+<<<<<<< HEAD
 max_iter = 50              # 最大迭代次数
 evaluation_iter = 2000             
 start_functions = 1
 num_functions = len(all_functions) - 1 - 20       
+=======
+max_iter = 500             # 最大迭代次数
+evaluation_iter = 1000             
+start_functions = 1
+num_functions = len(all_functions)  - 1
+# num_functions = 1
+>>>>>>> 4b08f78d0ad876e93d5b3c2657236dd055db07b5
 # esplion-greedy
 start_esp = 0.9
 end_esp = 0.01
@@ -30,7 +43,7 @@ end_esp = 0.01
 start_tau = 10
 end_tau = 0.1
 step = 0
-lr=0.00001
+lr=0.0001
 update_freq = 100
 arange = (-100, 100)
 
@@ -38,11 +51,14 @@ arange = (-100, 100)
 agent1 = DQNAgent(state_size=6, action_size=2, lr=lr)  # agent1，决定探索或开发
 agent2 = DQNAgent(state_size=8, action_size=len(operator_keys), lr=lr)  # agent2，选择算子
 
+# 记录勘探开发
+agent1_action = {'o{}'.format(i+1): {'exploration': [], 'exploitation': []} for i in range(len(operator_keys))}
+   
 # 主训练循环
 for iter in range(max_iter):
     count_dqn = {f'o{i+1}': 0 for i in range(len(operator_keys))}
     # 随机选择一个适应度函数
-    func_id = np.random.randint(start_functions, start_functions + num_functions)
+    func_id = iter % num_functions + start_functions
     fitness_function = all_functions[func_id]
      
     # 初始化种群
@@ -64,6 +80,9 @@ for iter in range(max_iter):
     # 记录一下每个回合的奖励
     # rewards = np.zeros((pop_size, evaluation_iter))
 
+    agent1_action[current_operator[0]]['exploration']
+    agent1_action[current_operator[0]]['exploitation']
+    # agent1_action_
     for eval_iter in range(evaluation_iter):
         old_pBest = np.copy(pBest)
         step += 1
@@ -76,7 +95,10 @@ for iter in range(max_iter):
         # agent1 选择探索(0)或开发(1)，对于每个个体
         action1 = agent1.act(state_features, tau)  # 软策略
         # action1 = agent1.act(state_features, epsilon)  # action1 的形状为 (pop_size,) epsilon-greedy策略
+        # action1_count = list(action1)
         
+        
+
         # 构建 agent2 的状态：agent1 的动作 + 当前算子索引 + state_features
         operator_indices = np.array([operator_keys.index(op) for op in current_operator])
         state2_features = np.column_stack((action1, operator_indices, state_features))  # shape: (pop_size, 8)
@@ -157,8 +179,18 @@ for iter in range(max_iter):
 # 保存训练好的模型
 if not os.path.exists('models'):
     os.makedirs('models')
-torch.save(agent1.qnetwork_local.state_dict(), 'models/agent1.pth')
-torch.save(agent2.qnetwork_local.state_dict(), 'models/agent2.pth')
+torch.save(agent1.qnetwork_local.state_dict(), 'models/agent1_test.pth')
+torch.save(agent2.qnetwork_local.state_dict(), 'models/agent2_test.pth')
+
+# # 保存勘探开发, 每个函数一个csv，两列，探索和开发
+# import pandas as pd 
+# for key, value in agent1_action.items():
+#     df = pd.DataFrame({'exploration': value['exploration'], 'exploitation': value['exploitation']})
+#     if not os.path.exists('train_exploration_exploitation'):
+#         os.makedirs('train_exploration_exploitation')
+#     df.to_csv(f'train_exploration_exploitation/exploration_exploitation_{key}.csv', index=False)
+ 
+
 
 print("训练完成")
 

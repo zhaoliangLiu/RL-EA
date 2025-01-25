@@ -353,7 +353,11 @@ def o15(individual_id, population, pBest, gBest, fitness_function, t, max_iter, 
     return new_individual, velocities
   
 # operators = [o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13, o14, o15]
+<<<<<<< HEAD
 # operators = [o7, o8, o9, o10, o11, o12, o13, o14, o15]
+=======
+operators = [o7, o8, o9, o10, o11, o12, o13, o14, o15]
+>>>>>>> 4b08f78d0ad876e93d5b3c2657236dd055db07b5
 
 # operators = [o7, o12]
 

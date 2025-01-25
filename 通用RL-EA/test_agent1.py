@@ -17,10 +17,10 @@ def test_agent_1(population, num_particles, dim, max_iter, fitness_function, ara
 
     agent1 = DQNAgent(state_size=6, action_size=2, lr=0.0001) 
     
-    if not os.path.exists('models/agent1.pth') or not os.path.exists('models/agent2.pth'):
+    if not os.path.exists('models/agent1_test.pth') or not os.path.exists('models/agent2_test.pth'):
         raise FileNotFoundError("请先训练模型，确保 'models/agent1.pth' 和 'models/agent2.pth' 文件存在。")
     
-    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1.pth')) 
+    agent1.qnetwork_local.load_state_dict(torch.load('models/agent1_test.pth')) 
     pop_size = population.shape[0]                # 种群大小
     dimension = population.shape[1]               # 维度
 
