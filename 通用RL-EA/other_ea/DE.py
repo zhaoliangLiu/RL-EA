@@ -77,7 +77,7 @@ if __name__ == "__main__":
         return np.sum(X**2, axis=1)
 
     # 问题设置
-    dim = 30
+    dim = 70
     pop_size = 100
     bounds = np.array([-100, 100])
     max_iter = 1000

@@ -70,15 +70,30 @@ if __name__ == "__main__":
 
     # 导入 fitness_function 模块
     from fitness_function.cec2017.functions import all_functions
-    population = np.random.rand(50, 10) * 200 - 100
-    for i in range(1, len(all_functions)):
-        func = all_functions[i]
-        gbest, gbest_value, gbest_history = standard_pso(population, 50, 10, 1000, func, (-100, 100))
-        print(gbest_value)
-        plt.plot(gbest_history)
-        plt.xlabel("Iteration")
-        plt.ylabel("Fitness")
-        plt.legend(["PSO"])
-        plt.title(f"PSO on Sphere Function{i}")
-        plt.show()
+   
+    # def fun(X):
+    #     import numpy as np
+    #     return np.array([
+    #         10 * X.shape[1] + np.sum(row**2 - 10 * np.cos(2 * np.pi * row))
+    #         for row in X
+    #     ])
 
+    # population = np.random.rand(50, 10) * 200 - 100
+    # for i in range(1, len(all_functions)):
+    #     func = all_functions[i]
+    #     gbest, gbest_value, gbest_history = standard_pso(population, 50, 10, 1000, func, (-100, 100))
+    #     print(gbest_value)
+    #     plt.plot(gbest_history)
+    #     plt.xlabel("Iteration")
+    #     plt.ylabel("Fitness")
+    #     plt.legend(["PSO"])
+    #     plt.title(f"PSO on Sphere Function{i}")
+    #     plt.show()
+    
+    population = np.random.rand(100, 30) * 200 - 100
+    func = all_functions[2]
+    gbest, gbest_value, gbest_history = standard_pso(population, 100, 30, 5000, func, (-100, 100))
+    plt.plot(gbest_history)
+    plt.xlabel("Iteration") 
+    print(gbest_value)
+    plt.show()

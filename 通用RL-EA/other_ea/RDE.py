@@ -139,11 +139,11 @@ if __name__ == "__main__":
     # 导入 fitness_function 模块
     from fitness_function.cec2017.functions import all_functions    
     # 问题设置
-    dim = 30
+    dim = 100
     pop_size = 100
     arange = np.array([-100, 100])
-    max_iter = 1000
-    func = all_functions[1]
+    max_iter = 3000
+    func = all_functions[2]
 
     # 初始化种群
     population = np.random.uniform(arange[0], arange[1], (pop_size, dim))

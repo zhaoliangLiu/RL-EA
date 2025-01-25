@@ -7,7 +7,8 @@ import torch.optim as optim
 from fitness_function.cec2017.functions import all_functions
 from utils import compute_state
 from dqn_agent import DQNAgent
-from operators import operators
+from LLH10 import operators
+# from operators import operators
 import random
 import os
 
@@ -18,10 +19,10 @@ operator_keys = list(operators_dict.keys())
 # 参数设置
 pop_size = 50                # 种群大小
 dimension = 10               # 维度
-max_iter = 200              # 最大迭代次数
+max_iter = 50              # 最大迭代次数
 evaluation_iter = 2000             
 start_functions = 1
-num_functions = len(all_functions) - 1        
+num_functions = len(all_functions) - 1 - 20       
 # esplion-greedy
 start_esp = 0.9
 end_esp = 0.01

@@ -105,10 +105,11 @@ def test_dqn_strategy(population, num_particles, dim, max_iter, fitness_function
 def test():
   
     fitness_function_id = 1
-    fitness_num = len(all_functions) - 1
+    # fitness_num = len(all_functions) - 1 
+    fitness_num = 1
     pop_size =  50
     dim = 10
-    max_iter = 1000
+    max_iter = 50000
     arange = (-100, 100)
 
     res = []

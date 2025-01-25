@@ -28,7 +28,7 @@ def test1():
     arange = [-100, 100]  # 搜索范围
 
     # 测试函数
-    func_id = 7                                         
+    func_id = 2                                         
     func = all_functions[func_id]
 
     # 初始化种群

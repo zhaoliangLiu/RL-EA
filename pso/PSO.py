@@ -2,7 +2,7 @@
 
 import numpy as np
 import random
-from fitness_function.cec2017.functions import all_functions, best_fitness
+from cec2017.functions import all_functions, best_fitness
 from operators import operators
 import matplotlib.pyplot as plt
 
@@ -23,7 +23,7 @@ c2 = 1.5                   # 社会学习因子
 # random.seed(random_seed)
 
 # 选择适应度函数
-func_id = 5  # 选择函数 f1，您可以更改为其他函数编号
+func_id = 1  # 选择函数 f1，您可以更改为其他函数编号
 fitness_function = all_functions[func_id]
 
 # 指定最优适应度值和容许误差范围
